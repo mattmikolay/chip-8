@@ -1,0 +1,165 @@
+# CHIP-8 Heart Monitor Simulation
+# Copyright 2015 Matthew Mikolay
+# See github.com/mattmikolay/chip-8 or mattmik.com for more info.
+
+:alias y v0                     # y coordinate of wave sprite
+:alias x1 v1                    # x coordinate of wave's right edge
+:alias x2 v2                    # x coordinate of wave's left edge
+:alias px v3                    # Temporary x coordinate used by subroutine
+:alias mod_val v4               # Stores the value 32, used in calculations
+:alias sound_reg v5             # Register used to play beeping noise
+
+:const BEEP_LENGTH 15           # Duration of beeping noise
+:const LINE_LENGTH 10           # Length of flat line before pulse occurs
+:const WAVE_Y 9                 # y coordinate of wave sprite
+
+: main
+
+    clear
+
+    # Set initial values
+    x1 := 0
+    x2 := 0
+    y := WAVE_Y
+    mod_val := 0b00011111
+    sound_reg := BEEP_LENGTH
+
+    # Draw starting line
+    i := step1
+    loop
+        sprite x1 y 13
+        x1 += 1
+        if x1 != LINE_LENGTH then
+    again
+
+    loop
+
+        # Draw (x1,y)
+        px := x1
+        read_i
+        sprite x1 y 13
+
+        # When the previous call to read_i terminates, px will store x1 % 32,
+        # which we can use to determine if we should play a beep sound
+        if px == 12 then
+            buzzer := sound_reg
+
+        # Draw (x2,y)
+        px := x2
+        read_i
+        sprite x2 y 13
+
+        # Increment x1 and x2
+        x1 += 1
+        x2 += 1
+
+        # Wrap x1 and x2 to the 64 pixel wide screen
+        if x1 == 64 then
+            x1 := 0
+        if x2 == 64 then
+            x2 := 0
+
+    again
+
+# Reads memory address of corresponding sprite into i register based upon the
+# current x coordinate stored in register px
+: read_i
+
+    # Get relative step, mod 32
+    px &= mod_val
+
+    # Load sprite based upon this relative step
+    i := step1
+    if px == 10 then
+        i := step2
+    if px == 13 then
+        i := step3
+    if px == 14 then
+        i := step4
+    if px == 15 then
+        i := step5
+    if px == 16 then
+        i := step6
+    if px == 17 then
+        i := step7
+    if px == 20 then
+        i := step2
+
+    return
+
+: step1
+    0b00000000
+
+: step2
+    0b00000000
+    0b00000000
+    0b00000000
+    0b00000000
+    0b00000000
+    0b00000000
+    0b10000000
+    0b00000000 #
+
+: step3
+    0b00000000
+    0b00000000
+    0b00000000
+    0b00000000
+    0b00000000
+    0b10000000
+    0b10000000
+    0b00000000 #
+    0b00000000
+    0b00000000
+
+: step4
+    0b00000000
+    0b00000000
+    0b00000000
+    0b10000000
+    0b10000000
+    0b00000000
+    0b00000000
+    0b00000000 #
+    0b00000000
+    0b00000000
+    0b00000000
+    0b00000000
+    0b00000000
+
+: step5
+    0b10000000
+    0b10000000
+    0b10000000
+    0b00000000
+    0b00000000
+    0b00000000
+    0b00000000
+    0b00000000 #
+    0b00000000
+    0b00000000
+
+: step6
+    0b00000000
+    0b00000000
+    0b00000000
+    0b10000000
+    0b10000000
+    0b10000000
+    0b10000000
+    0b10000000 #
+
+: step7
+    0b00000000
+    0b00000000
+    0b00000000
+    0b00000000
+    0b00000000
+    0b00000000
+    0b00000000
+    0b00000000 #
+    0b10000000
+    0b10000000
+    0b10000000
+    0b10000000
+    0b10000000

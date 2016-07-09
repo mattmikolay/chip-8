@@ -1,0 +1,49 @@
+# Random Number Test
+# Copyright 2015 Matthew Mikolay
+# See github.com/mattmikolay/chip-8 or mattmik.com for more info.
+
+# Note: Don't use v0, v1, or v2, as they are needed for printing digits
+:alias value v3                 # Register used to store random value
+:alias x v4                     # x coordinate of current digit
+:alias y v5                     # y coordinate of current digit
+
+: main
+
+    y := 0
+
+    loop
+
+        clear
+
+        # Generate a random value between 0 and 255 inclusive
+        value := random 0b11111111
+
+        # Store BCD of random value in program memory
+        i := program_end
+        bcd value
+        load v2
+
+        x := 0
+
+        # Print hundreds digit
+        i := hex v0
+        sprite x y 0x05
+
+        x += 5
+
+        # Print tens digit
+        i := hex v1
+        sprite x y 0x05
+
+        x += 5
+
+        # Print ones digit
+        i := hex v2
+        sprite x y 0x05
+
+        # Wait for a keypress
+        value := key
+
+    again
+
+: program_end

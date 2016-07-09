@@ -1,0 +1,74 @@
+# CHIP-8 Delay Timer Test
+# Copyright 2015 Matthew Mikolay
+# See github.com/mattmikolay/chip-8 or mattmik.com for more info.
+
+# Note: Don't use v0, v1, or v2, as they are needed for printing digits
+:alias x v3                     # x coordinate of current digit
+:alias y v4                     # y coordinate of current digit
+:alias current_key v5           # Key pressed by user
+:alias duration v6              # Duration of time entered by user
+
+: main
+
+    y := 0
+
+    loop
+
+        loop
+
+            print_time
+
+            current_key := key
+
+            # If user pressed 2 key, increment duration
+            if current_key == 0x02 then
+                duration += 0x01
+
+            # If user pressed 8 key, decrement duration
+            if current_key == 0x08 then
+                duration += 0xFF
+
+            # Continue accepting user input until the 5 key is pressed
+            if current_key != 0x05 then
+        again
+
+        # Begin a countdown from the time entered by the user
+        delay := duration
+        loop
+            duration := delay
+            print_time
+            if duration != 0x00 then
+        again
+
+    again
+
+: print_time
+
+    clear
+
+    # Store BCD of current time in program memory
+    i := program_end
+    bcd duration
+    load v2
+
+    x := 0
+
+    # Print hundreds digit
+    i := hex v0
+    sprite x y 0x05
+
+    x += 5
+
+    # Print tens digit
+    i := hex v1
+    sprite x y 0x05
+
+    x += 5
+
+    # Print ones digit
+    i := hex v2
+    sprite x y 0x05
+
+    return
+
+: program_end

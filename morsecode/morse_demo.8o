@@ -1,0 +1,327 @@
+# CHIP-8 Morse Code Demo
+# Copyright 2015 Matthew Mikolay
+# See github.com/mattmikolay/chip-8 or mattmik.com for more info.
+
+:alias x v0                     # x coordinate of current character
+:alias y v1                     # y coordinate of current character
+:alias delay_reg v2             # Register used for general timing
+:alias sound_reg v3             # Register used for beeps and boops
+
+:const MESSAGE_X 11             # x coordinate of message top left
+:const MESSAGE_Y 14             # y coordinate of message top left
+
+:const DASH_LENGTH 15           # Duration of Morse code dash
+:const DOT_LENGTH 5             # Duration of Morse code dot
+:const DASH_DOT_LENGTH 20       # Duration of Morse code dash followed by dot
+:const DOT_DOT_LENGTH 10        # Duration of Morse code dot followed by dot
+
+# Duration between the printing of individual letters.
+# This value should be 2 * DOT_LENGTH, as it always follows an
+# extra duration of DOT_LENGTH.
+:const LETTER_SEP_LENGTH 10
+
+# Duration between the printing of complete words.
+# This value should be 6 * DOT_LENGTH, as it always follows an
+# extra duration of DOT_LENGTH.
+:const WORD_SEP_LENGTH 30       # Duration of 
+
+# Duration of delay before erasing entire "COSMAC VIP" message
+:const PAUSE_LENGTH 120
+
+: main
+
+    clear
+
+    i := sprite_border
+
+    # Draw borders at top and bottom of screen
+    x := 0
+    loop
+
+        y := 0
+        sprite x y 13
+
+        y := 20
+        sprite x y 12
+
+        x += 8
+
+        if x != 64 then
+
+    again
+
+    y := MESSAGE_Y
+
+: type_letters
+
+    x := MESSAGE_X
+
+    draw_c
+    play_dash
+    play_dot
+    play_dash
+    play_dot
+    draw_c
+    end_letter
+    x += 4
+
+    draw_o
+    play_dash
+    play_dash
+    play_dash
+    draw_o
+    end_letter
+    x += 4
+
+    draw_s
+    play_dot
+    play_dot
+    play_dot
+    draw_s
+    end_letter
+    x += 4
+
+    draw_m
+    play_dash
+    play_dash
+    draw_m
+    end_letter
+    x += 6
+
+    draw_a
+    play_dot
+    play_dash
+    draw_a
+    end_letter
+    x += 4
+
+    draw_c
+    play_dash
+    play_dot
+    play_dash
+    play_dot
+    draw_c
+    end_word
+    x += 9
+
+    draw_v
+    play_dot
+    play_dot
+    play_dot
+    play_dash
+    draw_v
+    end_letter
+    x += 4
+
+    draw_i
+    play_dot
+    play_dot
+    draw_i
+    end_letter
+    x += 4
+
+    draw_p
+    play_dot
+    play_dash
+    play_dash
+    play_dot
+    draw_p
+    end_word
+
+    # Draw the entire message
+    draw_all
+
+    # Wait a bit before erasing the text
+    delay_reg := PAUSE_LENGTH
+    delay := delay_reg
+    loop
+        delay_reg := delay
+        while delay_reg != 0x00
+    again
+
+    # Erase the entire message
+    draw_all
+
+    jump type_letters
+
+: play_dash
+    sound_reg := DASH_LENGTH
+    delay_reg := DASH_DOT_LENGTH
+    buzzer := sound_reg
+    delay := delay_reg
+    loop
+        delay_reg := delay
+        while delay_reg != 0x00
+    again
+    return
+
+: play_dot
+    sound_reg := DOT_LENGTH
+    delay_reg := DOT_DOT_LENGTH
+    buzzer := sound_reg
+    delay := delay_reg
+    loop
+        delay_reg := delay
+        while delay_reg != 0x00
+    again
+    return
+
+: end_letter
+    delay_reg := LETTER_SEP_LENGTH
+    delay := delay_reg
+    loop
+        delay_reg := delay
+        while delay_reg != 0x00
+    again
+    return
+
+: end_word
+    delay_reg := WORD_SEP_LENGTH
+    delay := delay_reg
+    loop
+        delay_reg := delay
+        while delay_reg != 0x00
+    again
+    return
+
+: draw_c
+    i := sprite_c
+    sprite x y 5
+    return
+
+: draw_o
+    i := sprite_o
+    sprite x y 5
+    return
+
+: draw_s
+    i := sprite_s
+    sprite x y 5
+    return
+
+: draw_m
+    i := sprite_m
+    sprite x y 5
+    return
+
+: draw_a
+    i := sprite_a
+    sprite x y 5
+    return
+
+: draw_v
+    i := sprite_v
+    sprite x y 5
+    return
+
+: draw_i
+    i := sprite_i
+    sprite x y 5
+    return
+
+: draw_p
+    i := sprite_p
+    sprite x y 5
+    return
+
+: draw_all
+
+    x := MESSAGE_X
+
+    draw_c
+    x += 4
+
+    draw_o
+    x += 4
+
+    draw_s
+    x += 4
+
+    draw_m
+    x += 6
+
+    draw_a
+    x += 4
+
+    draw_c
+    x += 9
+
+    draw_v
+    x += 4
+
+    draw_i
+    x += 4
+
+    draw_p
+    return
+
+: sprite_c
+    0xE0
+    0xA0
+    0x80
+    0xA0
+    0xE0
+
+: sprite_o
+    0xE0
+    0xA0
+    0xA0
+    0xA0
+    0xE0
+
+: sprite_s
+    0xE0
+    0x80
+    0xE0
+    0x20
+    0xE0
+
+: sprite_m
+    0xF8
+    0xA8
+    0xA8
+    0xA8
+    0xA8
+
+: sprite_a
+    0xE0
+    0xA0
+    0xE0
+    0xA0
+    0xA0
+
+: sprite_v
+    0xA0
+    0xA0
+    0xA0
+    0xA0
+    0x40
+
+: sprite_i
+    0xE0
+    0x40
+    0x40
+    0x40
+    0xE0
+
+: sprite_p
+    0xE0
+    0xA0
+    0xE0
+    0x80
+    0x80
+
+: sprite_border
+    0xFF
+    0x00
+    0xFF
+    0x00
+    0xFF
+    0x00
+    0xFF
+    0x00
+    0xFF
+    0x00
+    0xFF
+    0x00
+    0xFF

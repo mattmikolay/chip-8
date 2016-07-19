@@ -1,0 +1,147 @@
+	; Start of program
+
+	; Display start screen
+	; Set up V1 to be difficulty
+200	6100	; V1 = difficulty = no diff. selected
+202	6500	; V5 = LEVEL = 0 (intro screen)
+204	226E	; Jump to subroutine to draw level
+206	F60A	; Wait for a keypress, store in V6 ; Start KEYINTRO
+208	4601	; Skip next instr. if V6 != 1
+20A	610A	; V1 = difficulty = 10
+20C	4602	; Skip next instr. if V6 != 2
+20E	6105	; V1 = difficulty = 5
+210	4603	; Skip next instr if V6 != 3
+212	6101	; V1 = difficulty = 1
+214	4100	; Skip next instr. if V1 != 0
+216	1206	; Jump to KEYINTRO
+
+	; Set player's x and y coordinates
+	; V2: Player's current direction (0 stationary, 1 right, 2 up, 3 left, 4  down)
+	; V3: X coordinate of player
+	; V4: Y coordinate of player
+218	6200	; Set V2 = 0, set player to stationary
+21A	6334	; V3 = X = 52
+21C	6414	; V4 = Y = 20
+
+	; Set the current level
+	; V5: Current level
+21E	6501	; V5 = LEVEL = 1
+
+	; START MNDRLV
+	; Jump to a subroutine to draw the current level
+220	226E	; Jump to subroutine to draw level
+
+	; Check for game end
+222	450B	; Skip next if LVL != 11 (final level)
+224	126C	; Jump to ENDGAME
+
+	; START KBRDCHK
+	; Let the player be controlled by the keyboard
+	; Update the direction by keypress
+	; V6: Scratch register for keypress
+226	6602	; Set V6 = 2
+228	E6A1	; Skip next if V6 not pressed
+22A	6202	; V2 = dir. = up
+22C	6606	; Set V6 = 6
+22E	E6A1	; Skip next if V6 not pressed
+230	6201	; V2 = dir. = right
+232	6604	; Set V6 = 4
+234	E6A1	; Skip next if V6 not pressed
+236	6203	; V2 = dir. = left
+238	6608	; Set V6 = 8
+23A	E6A1	; Skip next if V6 not pressed
+23C	6204	; V2 = dir. = down
+
+	; Change the player's x and y coordinates based on direction
+23E	4201	; Skip next if V2 != 1
+240	7301	; X = X + 1
+242	4202	; Skip next if V2 != 2
+244	74FF	; Y = Y - 1
+246	4203	; Skip next if V2 != 3
+248	73FF	; X = X - 1
+24A	4204	; Skip next if V2 != 4
+24C	7401	; Y = Y + 1
+
+	; Check if the player has beaten this level
+	; (if the player has reached the left side of the screen)
+24E	33FF	; Skip next if V3 = 255 (player wrapped around to right side of screen)
+250	1258	; Jump to DRWPLYR
+
+	; Progress to the next level
+252	633F	; Set X = 63
+254	7501	; Increment V5 = LVL
+256	1220	; Jump to MNDRLV
+	
+	; START DRWPLYR
+	; Draw the player
+258	A273	; Set I to addr. of player sprite
+25A	D341	; Draw the player on the screen
+
+	; Check for a collision with the graphics data
+25C	3F00	; Skip next if VF == 0
+25E	126C	; Jump to ENDGAME
+
+	; Set delay timer depending upon the game's difficulty
+260	F115	; DT = V1
+262	F607	; Set V6 = DT ; Start TCHECK
+264	3600	; Skip next if V6 = 0
+266	1262	; Jump to TCHECK
+
+268	D341	; Erase the player on the screen
+26A	1226	; Jump to KBRDCHK to keep moving the player
+
+	; Start ENDGAME
+26C	126C	; Jump to ENDGAME
+
+	; Subroutine: Draw current level
+	; V6: scratch register for addr. calculation
+	; V7: scratch register for length of graphics data
+26E	00E0	; Clear the screen
+270	8650	; V6 = V5 (scratch = level)
+272	6780	; V7 = 128 (number of bytes per half level data)
+274	A29A	; Set I = addr. of first level data
+
+	; START COMPLVL
+276	4600	; Skip next instr. if V6 != 0
+278	1282	; Jump to DRAWLVL
+27A	F71E	; I = I + 128
+27C	F71E	; I = I + 128
+27E	76FF	; V6 = V6 - 1 (V6 = V6 + 255)
+280	1276	; Jump to COMPLVL
+
+	; START DRAWLVL
+	; Draw the level graphics on screen
+	; V6: scratch register for x coordinate on screen
+	; V7: scratch register for y coordinate on screen
+	; V8: scratch register, stores 8 (length of a single block)
+282	6808	; V8 = 8
+
+	; Loop over y coordinates
+284	6700	; V7 = 0
+
+	; Loop over x coordinates
+	; START YDRAW
+286	6600	; V6 = 0
+	; START XDRAW
+288	D678	; Draw 8 x 8 sprite
+28A	7608	; Increment V6 by 8
+28C	F81E	; I = I + 8
+
+28E	3640	; Skip next instr. if V6 = 64 
+290	1288	; Jump to XDRAW
+
+292	7708	; Increment V7 by 8
+294	3720	; Skip next instr. if V7 = 32
+296	1286	; Jump to YDRAW
+
+298	00EE	; End subroutine
+
+29A	; Level graphics
+
+	; Title screen (Level 0)
+
+	; Level 1
+
+	; Level 2
+
+	; etc.

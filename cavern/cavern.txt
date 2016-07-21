@@ -4,135 +4,138 @@ See github.com/mattmikolay/chip-8 or mattmik.com for more info.
 
 ADDR    LABEL       INSTR   COMMENT
 
-                            Start program
+                            Begin program at address 200
 
                             Display start screen
-                            Set up V1 to be difficulty
-200                 6100    V1 = difficulty = no diff. selected
-202                 6500    V5 = LEVEL = 0 (intro screen)
-204                 226E    Jump to subroutine to draw level
+                            V1 register is game difficulty
+                            V5 register is current level number
+200                 6100    Set V1 (difficulty) = 0 for no difficulty selected
+202                 6500    Set V5 (level) = 0 for intro screen
+204                 226E    Jump to DRAWLEVEL subroutine to draw current level
 206     KEYINTRO    F60A    Wait for a keypress, store in V6
-208                 4601    Skip next instr. if V6 != 1
-20A                 610A    V1 = difficulty = 10
-20C                 4602    Skip next instr. if V6 != 2
-20E                 6105    V1 = difficulty = 5
-210                 4603    Skip next instr if V6 != 3
-212                 6101    V1 = difficulty = 1
-214                 4100    Skip next instr. if V1 != 0
+208                 4601    Skip next instruction if V6 != 1
+20A                 610A    Set V1 (difficulty) = 10
+20C                 4602    Skip next instruction if V6 != 2
+20E                 6105    Set V1 (difficulty) = 5
+210                 4603    Skip next instruction if V6 != 3
+212                 6101    Set V1 (difficulty) = 1
+214                 4100    Skip next instruction if V1 != 0
 216                 1206    Jump to KEYINTRO
 
                             Set player's x and y coordinates
-                            V2: Player's current direction (0 stationary, 1 right, 2 up, 3 left, 4  down)
-                            V3: X coordinate of player
-                            V4: Y coordinate of player
-218                 6200    Set V2 = 0, set player to stationary
-21A                 6334    V3 = X = 52
-21C                 6414    V4 = Y = 20
+                            V2 register is player's current direction:
+                                0 = stationary, 1 = right, 2 = up,
+                                3 = left, 4 = down
+                            V3 register is X coordinate of player
+                            V4 register is Y coordinate of player
+218                 6200    Set V2 (direction) = 0, defaulting to stationary
+21A                 6334    V3 (X) = 52
+21C                 6414    V4 (Y) = 20
 
-                            Set the current level
-                            V5: Current level
-21E                 6501    V5 = LEVEL = 1
+                            Move forward to the first playable level
+21E                 6501    Set V5 (level) = 1
 
-                            Jump to a subroutine to draw the current level
-220     MNDRLV      226E    Jump to subroutine to draw level
+220     NEXTLEVEL   226E    Jump to DRAWLEVEL subroutine to draw current level
 
                             Check for game end
-222                 450B    Skip next if LVL != 11 (final level)
+222                 450B    Skip next if V5 (level) != 11, the final level
 224                 126C    Jump to ENDGAME
 
-                            Let the player be controlled by the keyboard
-                            Update the direction by keypress
-                            V6: Scratch register for keypress
-226     KBRDCHK     6602    Set V6 = 2
+                            Let the player be controlled by the keypad
+                            Update direction register based upon keypress
+                            V6 register is scratch register to check pressed key
+226     KEYCHECK    6602    Set V6 = 2
 228                 E6A1    Skip next if V6 not pressed
-22A                 6202    V2 = dir. = up
+22A                 6202    Set V2 (direction) = up
 22C                 6606    Set V6 = 6
 22E                 E6A1    Skip next if V6 not pressed
-230                 6201    V2 = dir. = right
+230                 6201    Set V2 (direction) = right
 232                 6604    Set V6 = 4
 234                 E6A1    Skip next if V6 not pressed
-236                 6203    V2 = dir. = left
+236                 6203    Set V2 (direction) = left
 238                 6608    Set V6 = 8
 23A                 E6A1    Skip next if V6 not pressed
-23C                 6204    V2 = dir. = down
+23C                 6204    Set V2 (direction) = down
 
-                            Change the player's x and y coordinates based on direction
-23E                 4201    Skip next if V2 != 1
-240                 7301    X = X + 1
-242                 4202    Skip next if V2 != 2
-244                 74FF    Y = Y - 1
-246                 4203    Skip next if V2 != 3
-248                 73FF    X = X - 1
-24A                 4204    Skip next if V2 != 4
-24C                 7401    Y = Y + 1
+                            Update player's x and y position based on direction
+23E                 4201    Skip next if V2 (direction) != 1
+240                 7301    Increment V3, X = X + 1
+242                 4202    Skip next if V2 (direction) != 2
+244                 74FF    Decrement V4, Y = Y - 1
+246                 4203    Skip next if V2 (direction) != 3
+248                 73FF    Decrement V3, X = X - 1
+24A                 4204    Skip next if V2 (direction) != 4
+24C                 7401    Increment V4, Y = Y + 1
 
-                            Check if the player has beaten this level
-                            (if the player has reached the left side of the screen)
-24E                 33FF    Skip next if V3 = 255 (player wrapped around to right side of screen)
-250                 1258    Jump to DRWPLYR
+                            Check if player has beaten the current level
+                            (If player has reached the left side of the screen)
+24E                 33FF    Skip next if V3 (X) = 255, meaning the player
+                            wrapped around to right side of screen)
+250                 1258    Jump to DRAWPLAYER
 
                             Progress to the next level
-252                 633F    Set X = 63
-254                 7501    Increment V5 = LVL
-256                 1220    Jump to MNDRLV
+252                 633F    Set V3 (X) = 63, the far right side of the screen
+254                 7501    Increment V5 (level)
+256                 1220    Jump to NEXTLEVEL
 
                             Draw the player
-258     DRWPLYR     A273    Set I to addr. of player sprite
-25A                 D341    Draw the player on the screen
+258     DRAWPLAYER  A273    Set I to address of player sprite
+25A                 D341    Draw the player sprite on the screen
 
                             Check for a collision with the graphics data
 25C                 3F00    Skip next if VF == 0
 25E                 126C    Jump to ENDGAME
 
                             Set delay timer depending upon the game's difficulty
-260                 F115    DT = V1
-262     TCHECK      F607    Set V6 = DT
+260                 F115    DT = V1 (difficulty)
+262     TIMECHECK   F607    Set V6 = DT
 264                 3600    Skip next if V6 = 0
-266                 1262    Jump to TCHECK
+266                 1262    Jump to TIMECHECK
 
-268                 D341    Erase the player on the screen
-26A                 1226    Jump to KBRDCHK to keep moving the player
+268                 D341    Erase player sprite on the screen
+26A                 1226    Jump to KEYCHECK to keep the player moving
 
 26C     ENDGAME     126C    Jump to ENDGAME
 
                             Subroutine: Draw current level
-                            V6: scratch register for addr. calculation
-                            V7: scratch register for length of graphics data
-26E                 00E0    Clear the screen
+                            V6 is scratch register for address calculation
+                            V7 is scratch register for length of graphics data
+26E     DRAWLEVEL   00E0    Clear the screen
 270                 8650    V6 = V5 (scratch = level)
 272                 6780    V7 = 128 (number of bytes per half level data)
-274                 A29A    Set I = addr. of first level data
+274                 A29A    Set I = address of first level data
 
-276     COMPLVL     4600    Skip next instr. if V6 != 0
-278                 1282    Jump to DRAWLVL
+276     FINDLEVEL   4600    Skip next instruction if V6 != 0
+278                 1282    Jump to LEVELSPRITE
 27A                 F71E    I = I + 128
 27C                 F71E    I = I + 128
 27E                 76FF    V6 = V6 - 1 (V6 = V6 + 255)
-280                 1276    Jump to COMPLVL
+280                 1276    Jump to FINDLEVEL
 
-                            Draw the level graphics on screen
-                            V6: scratch register for x coordinate on screen
-                            V7: scratch register for y coordinate on screen
-                            V8: scratch register, stores 8 (length of a single block)
-282     DRAWLVL     6808    V8 = 8
+                            Draw the level's sprite data to the screen
+                            V6 is scratch register for x coordinate on screen
+                            V7 is scratch register for y coordinate on screen
+                            V8 is scratch register, stores the constant 8
+                                (length of a single block)
+282     LEVELSPRITE 6808    V8 = 8
 
-                            Loop over y coordinates
+                            Loop over y coordinates of screen
 284                 6700    V7 = 0
 
-                            Loop over x coordinates
+                            Loop over x coordinates of screen
 286     YDRAW       6600    V6 = 0
 288     XDRAW       D678    Draw 8 x 8 sprite
 28A                 7608    Increment V6 by 8
 28C                 F81E    I = I + 8
 
-28E                 3640    Skip next instr. if V6 = 64 
+28E                 3640    Skip next instruction if V6 = 64 
 290                 1288    Jump to XDRAW
 
 292                 7708    Increment V7 by 8
-294                 3720    Skip next instr. if V7 = 32
+294                 3720    Skip next instruction if V7 = 32
 296                 1286    Jump to YDRAW
 
-298                 00EE    End subroutine
+298                 00EE    End DRAWLEVEL subroutine
 
                             Level graphics from here forward...
 

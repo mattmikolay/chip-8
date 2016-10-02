@@ -1,0 +1,39 @@
+# Chipquarium
+# Copyright 2016 Matthew Mikolay
+# For licensing info, please see accompanying LICENSE file.
+# See github.com/mattmikolay/chip-8 or mattmik.com for more info.
+
+: main
+
+    jump main
+
+: small_fish_right
+    0b10110000
+    0b01111000
+    0b10110000
+
+: medium_fish_right
+    0b11011110
+    0b01111101
+    0b01111111
+    0b11011110
+
+: large_fish_1_right
+    0b00000000
+    0b00000000
+    0b00001111
+    0b11011111
+    0b01111111
+    0b00111111
+    0b01011110
+    0b11001111
+
+: large_fish_2_right
+    0b01110000
+    0b10001000
+    0b11001000
+    0b11100000
+    0b10100000
+    0b11100000
+    0b00000000
+    0b11000000

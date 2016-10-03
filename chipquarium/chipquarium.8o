@@ -3,9 +3,44 @@
 # For licensing info, please see accompanying LICENSE file.
 # See github.com/mattmikolay/chip-8 or mattmik.com for more info.
 
+:alias fish_x v8    # x coordinate of the fishy
+:alias fish_y v9    # y coordinate of the fishy
+
 : main
 
-    jump main
+    fish_x := 10
+    fish_y := 10
+    draw_large_fish
+
+: end_game
+
+    jump end_game
+
+: draw_small_fish
+    i := small_fish_right
+    sprite fish_x fish_y 3
+    return
+
+: draw_medium_fish
+    i := medium_fish_right
+    sprite fish_x fish_y 4
+    return
+
+: draw_large_fish
+
+    # Draw the left half of the large fish sprite
+    i := large_fish_1_right
+    sprite fish_x fish_y 8
+
+    fish_x += 8
+
+    # Draw the right half of the large fish sprite
+    i := large_fish_2_right
+    sprite fish_x fish_y 8
+
+    fish_x += -8
+
+    return
 
 : small_fish_right
     0b10110000

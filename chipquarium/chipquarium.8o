@@ -5,8 +5,12 @@
 
 :alias fish_x v8    # x coordinate of the fishy
 :alias fish_y v9    # y coordinate of the fishy
+:alias scratch_1 v1 # Scratch register 1
+:alias scratch_2 v2 # Scratch register 2
 
 : main
+
+    draw_ground
 
     fish_x := 10
     fish_y := 10
@@ -15,6 +19,20 @@
 : end_game
 
     jump end_game
+
+: draw_ground
+
+    i := ground
+    
+    scratch_2 := 31
+    scratch_1 := 0
+
+    loop
+        sprite scratch_1 scratch_2 1
+        scratch_1 += 8
+        if scratch_1 != 64 then
+    again
+    return
 
 : draw_small_fish
     i := small_fish_right
@@ -41,6 +59,9 @@
     fish_x += -8
 
     return
+
+: ground
+    0b11111111
 
 : small_fish_right
     0b10110000

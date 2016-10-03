@@ -18,13 +18,32 @@
     stat_poop := 0b10001001
     draw_poop
 
-    fish_x := 10
-    fish_y := 10
+: event_loop
+
+    # Choose a random x offset in [1,8] for the fish
+    scratch_1 := random 0x7
+    fish_x += scratch_1
+    fish_x += 1
+
+    # Choose a random y coordinate in [6,21] for the fish
+    fish_y := random 0x0F
+    fish_y += 6
+
+    # Draw the fish sprite at the newly calculated position
     draw_large_fish
 
-: end_game
+    scratch_1 := 0x30
+    delay := scratch_1
 
-    jump end_game
+    loop
+        scratch_1 := delay
+        while scratch_1 != 0x00
+    again
+
+    # Erase the fish sprite at its current location
+    draw_large_fish
+
+    jump event_loop
 
 : draw_ground
 

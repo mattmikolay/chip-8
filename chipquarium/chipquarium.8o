@@ -3,14 +3,20 @@
 # For licensing info, please see accompanying LICENSE file.
 # See github.com/mattmikolay/chip-8 or mattmik.com for more info.
 
+:alias stat_poop vB
+
 :alias fish_x v8    # x coordinate of the fishy
 :alias fish_y v9    # y coordinate of the fishy
 :alias scratch_1 v1 # Scratch register 1
 :alias scratch_2 v2 # Scratch register 2
+:alias scratch_3 v3 # Scratch register 3
 
 : main
 
     draw_ground
+
+    stat_poop := 0b10001001
+    draw_poop
 
     fish_x := 10
     fish_y := 10
@@ -32,6 +38,31 @@
         scratch_1 += 8
         if scratch_1 != 64 then
     again
+    return
+
+: draw_poop
+
+    i := poop
+
+    # x coordinate of poop sprite
+    scratch_3 := 0
+
+    # y coordinate of poop sprite
+    scratch_2 := 29
+
+    scratch_1 := stat_poop
+
+    loop
+
+        scratch_1 <<= scratch_1
+        if vF != 0x00 then
+            sprite scratch_3 scratch_2 2
+
+        scratch_3 += 8
+
+        if scratch_1 != 0x00 then
+    again
+
     return
 
 : draw_small_fish
@@ -62,6 +93,10 @@
 
 : ground
     0b11111111
+
+: poop
+    0b00011000
+    0b00111100
 
 : small_fish_right
     0b10110000

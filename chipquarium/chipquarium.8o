@@ -5,6 +5,7 @@
 
 :alias stat_poop vB
 
+:alias fish_dir v7  # Direction of the fishy (0x00 = left, 0x01 = right)
 :alias fish_x v8    # x coordinate of the fishy
 :alias fish_y v9    # y coordinate of the fishy
 :alias scratch_1 v1 # Scratch register 1
@@ -17,6 +18,9 @@
 
     stat_poop := 0b10001001
     draw_poop
+
+    # At the start, the fish should point toward the right
+    fish_dir := 0x01
 
 : event_loop
 
@@ -85,25 +89,37 @@
     return
 
 : draw_small_fish
-    i := small_fish_right
+
+    i := small_fish_left
+    if fish_dir == 0x01 then
+        i := small_fish_right
+
     sprite fish_x fish_y 3
     return
 
 : draw_medium_fish
-    i := medium_fish_right
+
+    i := medium_fish_left
+    if fish_dir == 0x01 then
+        i := medium_fish_right
+
     sprite fish_x fish_y 4
     return
 
 : draw_large_fish
 
     # Draw the left half of the large fish sprite
-    i := large_fish_1_right
+    i := large_fish_1_left
+    if fish_dir == 0x01 then
+        i := large_fish_1_right
     sprite fish_x fish_y 8
 
     fish_x += 8
 
     # Draw the right half of the large fish sprite
-    i := large_fish_2_right
+    i := large_fish_2_left
+    if fish_dir == 0x01 then
+        i := large_fish_2_right
     sprite fish_x fish_y 8
 
     fish_x += -8

@@ -24,10 +24,19 @@
 
 : event_loop
 
-    # Choose a random x offset in [1,8] for the fish
-    scratch_1 := random 0x7
-    fish_x += scratch_1
-    fish_x += 1
+    # Choose a random x offset in [1,4] for the fish
+    scratch_1 := random 0b00000011
+
+    # If fish is facing right, increase x coordinate
+    if fish_dir == 0x01 begin
+        fish_x += scratch_1
+        fish_x += 1
+
+    # If fish is facing left, decrease x coordinate
+    else
+        fish_x -= scratch_1
+        fish_x += -1
+    end
 
     # Choose a random y coordinate in [6,21] for the fish
     fish_y := random 0x0F
@@ -47,7 +56,29 @@
     # Erase the fish sprite at its current location
     draw_large_fish
 
+    update_direction
+
     jump event_loop
+
+# Updates the fish's direction, if the fish has hit one of the boundaries
+: update_direction
+
+    # Check for fish at right edge of screen
+    scratch_1 := fish_x
+    scratch_1 += 16
+    scratch_2 := 0b11000000
+    scratch_1 &= scratch_2
+    if scratch_1 != 0x00 then
+        fish_dir := 0x00
+
+    # Check for fish at left edge of screen
+    scratch_1 := fish_x
+    scratch_2 := 0b11111000
+    scratch_1 &= scratch_2
+    if scratch_1 == 0x00 then
+        fish_dir := 0x01
+
+    return
 
 : draw_ground
 

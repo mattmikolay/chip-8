@@ -5,6 +5,7 @@
 
 :alias stat_poop vB
 
+:alias fish_level v6 # Fish level (0x00 = small, 0x01 = medium, 0x02 = large)
 :alias fish_dir v7  # Direction of the fishy (0x00 = left, 0x01 = right)
 :alias fish_x v8    # x coordinate of the fishy
 :alias fish_y v9    # y coordinate of the fishy
@@ -21,6 +22,9 @@
 
     # At the start, the fish should point toward the right
     fish_dir := 0x01
+
+    # Begin with a small fish!
+    fish_level := 0x00
 
 : event_loop
 
@@ -43,7 +47,7 @@
     fish_y += 6
 
     # Draw the fish sprite at the newly calculated position
-    draw_large_fish
+    draw_fish
 
     scratch_1 := 0x30
     delay := scratch_1
@@ -54,13 +58,15 @@
     again
 
     # Erase the fish sprite at its current location
-    draw_large_fish
+    draw_fish
 
     update_direction
 
     jump event_loop
 
+#########################################################################
 # Updates the fish's direction, if the fish has hit one of the boundaries
+#########################################################################
 : update_direction
 
     # Check for fish at right edge of screen
@@ -80,6 +86,9 @@
 
     return
 
+###################################
+# Draws the bottom of the fish tank
+###################################
 : draw_ground
 
     i := ground
@@ -94,6 +103,9 @@
     again
     return
 
+###########################################################
+# Draws a row of fish droppings at the bottom of the screen
+###########################################################
 : draw_poop
 
     i := poop
@@ -119,6 +131,24 @@
 
     return
 
+########################################################
+# Draws the fish sprite on the screen at fish_x, fish_y.
+# The fish's size will depend upon its level.
+########################################################
+: draw_fish
+
+    if fish_level == 0x00 then
+        draw_small_fish
+    if fish_level == 0x01 then
+        draw_medium_fish
+    if fish_level == 0x02 then
+        draw_large_fish
+
+    return
+
+#######################################################
+# Draws a small fish sprite on screen at fish_x, fish_y
+#######################################################
 : draw_small_fish
 
     i := small_fish_left
@@ -128,6 +158,9 @@
     sprite fish_x fish_y 3
     return
 
+########################################################
+# Draws a medium fish sprite on screen at fish_x, fish_y
+########################################################
 : draw_medium_fish
 
     i := medium_fish_left
@@ -137,6 +170,9 @@
     sprite fish_x fish_y 4
     return
 
+#######################################################
+# Draws a large fish sprite on screen at fish_x, fish_y
+#######################################################
 : draw_large_fish
 
     # Draw the left half of the large fish sprite

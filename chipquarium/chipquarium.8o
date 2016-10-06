@@ -53,7 +53,10 @@
     delay := scratch_1
 
     loop
+
+        check_key
         scratch_1 := delay
+
         while scratch_1 != 0x00
     again
 
@@ -63,6 +66,24 @@
     update_direction
 
     jump event_loop
+
+
+#########################################################
+# Checks if a key has been pressed and reacts accordingly
+#########################################################
+: check_key
+
+    # Clean tank if 'C' key is pressed
+    scratch_2 := 0x0C
+    if scratch_2 key begin
+
+        # Erase current poop sprites and reset poop value
+        draw_poop
+        stat_poop := 0x00
+
+    end
+
+    return
 
 #########################################################################
 # Updates the fish's direction, if the fish has hit one of the boundaries

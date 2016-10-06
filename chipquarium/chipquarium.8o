@@ -83,6 +83,20 @@
 
     end
 
+    # Feed fish if 'F' key is pressed
+    scratch_2 := 0x0F
+    if scratch_2 key begin
+
+        # Choose random x location in [16, 47] for fish food
+        scratch_2 := random 0b11111
+        scratch_2 += 16
+        scratch_3 := 0x00
+
+        i := food
+        sprite scratch_2 scratch_3 6
+
+    end
+
     return
 
 #########################################################################

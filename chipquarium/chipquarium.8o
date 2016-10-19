@@ -5,6 +5,9 @@
 
 :alias stat_poop vB
 
+:alias state_val1 v0
+:alias state_val2 v5
+:alias game_state v4 # Game state
 :alias fish_level v6 # Fish level (0x00 = small, 0x01 = medium, 0x02 = large)
 :alias fish_dir v7  # Direction of the fishy (0x00 = left, 0x01 = right)
 :alias fish_x v8    # x coordinate of the fishy
@@ -12,6 +15,13 @@
 :alias scratch_1 v1 # Scratch register 1
 :alias scratch_2 v2 # Scratch register 2
 :alias scratch_3 v3 # Scratch register 3
+:alias hunger_stat va
+
+:const STATE_SWIMMING   0x00
+:const STATE_FEEDING    0x01
+:const STATE_SLEEPING   0x02
+:const STATE_PLAYING    0x03
+:const STATE_DEAD       0x04
 
 : main
 
@@ -19,6 +29,12 @@
 
     stat_poop := 0b10001001
     draw_poop
+
+    # Default to the swimming state
+    game_state := STATE_SWIMMING
+
+    # Set stat defaults
+    hunger_stat := 0x00
 
     # At the start, the fish should point toward the right
     fish_dir := 0x01
@@ -28,26 +44,53 @@
 
 : event_loop
 
-    # Choose a random x offset in [1,4] for the fish
-    scratch_1 := random 0b00000011
+    if game_state == STATE_SWIMMING begin
 
-    # If fish is facing right, increase x coordinate
-    if fish_dir == 0x01 begin
-        fish_x += scratch_1
-        fish_x += 1
+        # Choose a random x offset in [1,4] for the fish
+        scratch_1 := random 0b00000011
 
-    # If fish is facing left, decrease x coordinate
-    else
-        fish_x -= scratch_1
-        fish_x += -1
+        # If fish is facing right, increase x coordinate
+        if fish_dir == 0x01 begin
+            fish_x += scratch_1
+            fish_x += 1
+
+        # If fish is facing left, decrease x coordinate
+        else
+            fish_x -= scratch_1
+            fish_x += -1
+        end
+
+        # Choose a random y coordinate in [6,21] for the fish
+        fish_y := random 0x0F
+        fish_y += 6
+
+        # Draw the fish sprite at the newly calculated position
+        draw_fish
+
     end
 
-    # Choose a random y coordinate in [6,21] for the fish
-    fish_y := random 0x0F
-    fish_y += 6
+    if game_state == STATE_FEEDING begin
 
-    # Draw the fish sprite at the newly calculated position
-    draw_fish
+        # If fish is at top of screen, erase food and return to swimming state
+        if fish_y == 0x04 begin
+
+            i := food
+            sprite state_val1 state_val2 6
+
+            game_state := STATE_SWIMMING
+
+        else
+
+            # Erase the fish sprite at its current location
+            draw_fish
+
+            fish_y += -1
+
+            draw_fish
+
+        end
+
+    end
 
     scratch_1 := 0x30
     delay := scratch_1
@@ -60,10 +103,14 @@
         while scratch_1 != 0x00
     again
 
-    # Erase the fish sprite at its current location
-    draw_fish
+    if game_state == STATE_SWIMMING begin
 
-    update_direction
+        # Erase the fish sprite at its current location
+        draw_fish
+
+        update_direction
+
+    end
 
     jump event_loop
 
@@ -73,27 +120,36 @@
 #########################################################
 : check_key
 
-    # Clean tank if 'C' key is pressed
-    scratch_2 := 0x0C
-    if scratch_2 key begin
+    if game_state == STATE_SWIMMING begin
 
-        # Erase current poop sprites and reset poop value
-        draw_poop
-        stat_poop := 0x00
+        # Clean tank if 'C' key is pressed
+        scratch_2 := 0x0C
+        if scratch_2 key begin
 
-    end
+            # Erase current poop sprites and reset poop value
+            draw_poop
+            stat_poop := 0x00
 
-    # Feed fish if 'F' key is pressed
-    scratch_2 := 0x0F
-    if scratch_2 key begin
+        end
 
-        # Choose random x location in [16, 47] for fish food
-        scratch_2 := random 0b11111
-        scratch_2 += 16
-        scratch_3 := 0x00
+        # Feed fish if 'F' key is pressed
+        scratch_2 := 0x0F
+        if scratch_2 key begin
 
-        i := food
-        sprite scratch_2 scratch_3 6
+            # Choose random x location in [16, 47] for fish food
+            # state_val1 and state_val2 will temporarily store food x and y
+            state_val1 := random 0b11111
+            state_val1 += 16
+            state_val2 := 0x00
+
+            i := food
+            sprite state_val1 state_val2 6
+
+            # Transition to feeding state and reset hunger
+            game_state := STATE_FEEDING
+            hunger_stat := 0x00
+
+        end
 
     end
 

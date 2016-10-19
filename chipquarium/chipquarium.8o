@@ -17,6 +17,7 @@
 :alias scratch_3 v3 # Scratch register 3
 :alias hunger_stat va
 :alias stamina_stat vc
+:alias health_stat ve
 
 :const STATE_SWIMMING   0x00
 :const STATE_FEEDING    0x01
@@ -35,6 +36,7 @@
     game_state := STATE_SWIMMING
 
     # Set stat defaults
+    health_stat := 0xFF
     hunger_stat := 0x00
     stamina_stat := 0xFF
 
@@ -45,6 +47,10 @@
     fish_level := 0x00
 
 : event_loop
+
+    # If fish health hits zero, the game is over
+    if health_stat == 0x00 then
+        end_game
 
     if game_state == STATE_SWIMMING begin
 
@@ -136,7 +142,6 @@
     end
 
     jump event_loop
-
 
 #########################################################
 # Checks if a key has been pressed and reacts accordingly
@@ -231,6 +236,22 @@
 
     return
 
+# Ends the game, preventing further user interaction. Rest in peace, fishy.
+: end_game
+
+    # If the fish has already gone to fishy heaven, there's nothing to do
+    if game_state == STATE_DEAD then
+        return
+
+    game_state := STATE_DEAD
+
+    # Draw an upside-down fish at the top of the tank
+    fish_y := 0x00
+    fish_dir := 0x01
+    draw_flipped_fish
+
+    return
+
 ###################################
 # Draws the bottom of the fish tank
 ###################################
@@ -291,6 +312,21 @@
 
     return
 
+###################################################################
+# Draws an upside-down fish sprite on the screen at fish_x, fish_y.
+# The fish's size will depend upon its level.
+###################################################################
+: draw_flipped_fish
+
+    if fish_level == 0x00 then
+        draw_small_fish
+    if fish_level == 0x01 then
+        draw_medium_flipped_fish
+    if fish_level == 0x02 then
+        draw_large_flipped_fish
+
+    return
+
 #######################################################
 # Draws a small fish sprite on screen at fish_x, fish_y
 #######################################################
@@ -315,6 +351,14 @@
     sprite fish_x fish_y 4
     return
 
+####################################################################
+# Draws a medium upside-down fish sprite on screen at fish_x, fish_y
+####################################################################
+: draw_medium_flipped_fish
+    i := medium_flipped_fish
+    sprite fish_x fish_y 4
+    return
+
 #######################################################
 # Draws a large fish sprite on screen at fish_x, fish_y
 #######################################################
@@ -335,6 +379,23 @@
     sprite fish_x fish_y 8
 
     fish_x += -8
+
+    return
+
+###################################################################
+# Draws a large upside-down fish sprite on screen at fish_x, fish_y
+###################################################################
+: draw_large_flipped_fish
+
+    # Draw the left half of the large fish sprite
+    i := large_flipped_fish_1
+    sprite fish_x fish_y 6
+
+    fish_x += 8
+
+    # Draw the right half of the large fish sprite
+    i := large_flipped_fish_2
+    sprite fish_x fish_y 6
 
     return
 
@@ -391,6 +452,12 @@
     0b01111111
     0b11011110
 
+: medium_flipped_fish
+    0b11011110
+    0b01111111
+    0b01111111
+    0b11011110
+
 : large_fish_1_left
     0b01110000
     0b10001000
@@ -429,4 +496,20 @@
     0b10100000
     0b11100000
     0b00000000
+    0b11000000
+
+: large_flipped_fish_1
+    0b11001111
+    0b01011110
+    0b00111111
+    0b01111111
+    0b11011111
+    0b00001111
+
+: large_flipped_fish_2
+    0b11000000
+    0b00000000
+    0b11100000
+    0b11100000
+    0b11100000
     0b11000000

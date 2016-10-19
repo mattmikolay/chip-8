@@ -16,6 +16,7 @@
 :alias scratch_2 v2 # Scratch register 2
 :alias scratch_3 v3 # Scratch register 3
 :alias hunger_stat va
+:alias stamina_stat vc
 
 :const STATE_SWIMMING   0x00
 :const STATE_FEEDING    0x01
@@ -35,6 +36,7 @@
 
     # Set stat defaults
     hunger_stat := 0x00
+    stamina_stat := 0xFF
 
     # At the start, the fish should point toward the right
     fish_dir := 0x01
@@ -66,6 +68,27 @@
 
         # Draw the fish sprite at the newly calculated position
         draw_fish
+
+    end
+
+    if game_state == STATE_SLEEPING begin
+
+        i := sleep_bubbles_2
+        sprite state_val1 state_val2 6
+
+        scratch_3 += -1
+
+        # If done sleeping...
+        if scratch_3 == 0x00 begin
+
+            # Erase sleeping bubbles
+            i := sleep_bubbles_1
+            sprite state_val1 state_val2 6
+
+            # Return to swimming state
+            game_state := STATE_SWIMMING
+
+        end
 
     end
 
@@ -129,6 +152,37 @@
             # Erase current poop sprites and reset poop value
             draw_poop
             stat_poop := 0x00
+
+        end
+
+        # Sleep if 'D' key is pressed
+        scratch_2 := 0x0D
+        if scratch_2 key begin
+
+            # state_val1 will temporarily store bubbles x
+            state_val1 := fish_x
+            state_val1 += 5
+
+            # Adjust bubble x based upon fish width
+            if fish_level == 0x01 then
+                state_val1 += 3
+            if fish_level == 0x02 then
+                state_val1 += 9
+
+            # state_val2 will temporarily store bubbles y
+            state_val2 := fish_y
+            state_val2 += -6
+
+            # Draw sleep bubbles above the fish
+            i := sleep_bubbles_1
+            sprite state_val1 state_val2 6
+
+            # Transition to sleeping state and reset stamina
+            game_state := STATE_SLEEPING
+            stamina_stat := 0xFF
+
+            # Use scratch_3 to keep track of how long to stay sleeping
+            scratch_3 := 0x0A
 
         end
 
@@ -298,6 +352,22 @@
     0b00001000
     0b10000000
     0b00100000
+
+: sleep_bubbles_1
+    0b10000000
+    0b00000000
+    0b10000000
+    0b00000000
+    0b10000000
+    0b00000000
+
+: sleep_bubbles_2
+    0b10000000
+    0b10000000
+    0b10000000
+    0b10000000
+    0b10000000
+    0b10000000
 
 : small_fish_left
     0b01101000

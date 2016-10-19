@@ -16,6 +16,7 @@
 :alias scratch_2 v2 # Scratch register 2
 :alias scratch_3 v3 # Scratch register 3
 :alias hunger_stat va
+:alias happy_stat vd
 :alias stamina_stat vc
 :alias health_stat ve
 
@@ -38,7 +39,8 @@
 
     # Set stat defaults
     health_stat := 0xFF
-    hunger_stat := 0x00
+    hunger_stat := 0x40
+    happy_stat := 0x40
     stamina_stat := 0xFF
 
     # At the start, the fish should point toward the right
@@ -414,7 +416,86 @@
     i := stamina_text_4
     sprite scratch_1 scratch_2 5
 
+    # Store BCD of hunger stat
+    i := bcd_address_1
+    scratch_1 := hunger_stat
+    bcd scratch_1
 
+    i := bcd_address_1
+    load v0
+    i := hex v0
+
+    scratch_1 := 46
+    scratch_2 := 4
+    sprite scratch_1 scratch_2 5
+
+    i := bcd_address_2
+    load v0
+    i := hex v0
+
+    scratch_1 := 51
+    sprite scratch_1 scratch_2 5
+
+    i := bcd_address_3
+    load v0
+    i := hex v0
+
+    scratch_1 := 56
+    sprite scratch_1 scratch_2 5
+
+    # Store BCD of happy stat
+    i := bcd_address_1
+    scratch_1 := happy_stat
+    bcd scratch_1
+
+    i := bcd_address_1
+    load v0
+    i := hex v0
+
+    scratch_1 := 46
+    scratch_2 := 13
+    sprite scratch_1 scratch_2 5
+
+    i := bcd_address_2
+    load v0
+    i := hex v0
+
+    scratch_1 := 51
+    sprite scratch_1 scratch_2 5
+
+    i := bcd_address_3
+    load v0
+    i := hex v0
+
+    scratch_1 := 56
+    sprite scratch_1 scratch_2 5
+
+    # Store BCD of stamina stat
+    i := bcd_address_1
+    scratch_1 := stamina_stat
+    bcd scratch_1
+
+    i := bcd_address_1
+    load v0
+    i := hex v0
+
+    scratch_1 := 46
+    scratch_2 := 22
+    sprite scratch_1 scratch_2 5
+
+    i := bcd_address_2
+    load v0
+    i := hex v0
+
+    scratch_1 := 51
+    sprite scratch_1 scratch_2 5
+
+    i := bcd_address_3
+    load v0
+    i := hex v0
+
+    scratch_1 := 56
+    sprite scratch_1 scratch_2 5
 
     return
 
@@ -675,4 +756,9 @@
     0b10101000
     0b10101000
 
-: bcd_address
+: bcd_address_1
+    0x00
+: bcd_address_2
+    0x00
+: bcd_address_3
+    0x00

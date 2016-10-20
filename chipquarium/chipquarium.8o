@@ -158,14 +158,14 @@
 
     end
 
-    scratch_1 := 0xFF
+    scratch_1 := 30
     delay := scratch_1
 
     loop
 
         check_key
-        scratch_1 := delay
 
+        scratch_1 := delay
         while scratch_1 != 0x00
     again
 
@@ -176,11 +176,11 @@
 
         update_direction
 
-    end
+        # Increment the event timer
+        event_timer += 0x01
+        check_event_timer
 
-    # Increment the event timer
-    event_timer += 0x01
-    check_event_timer
+    end
 
     jump event_loop
 
@@ -194,14 +194,12 @@
         if health_stat != 0x00 then
             health_stat += -2
 
-        return
-
     end
 
     # Event: Add a poop to the bottom of the tank
-    scratch_1 := 0b00000011
+    scratch_1 := 0b00000111
     scratch_1 &= event_timer
-    if scratch_1 == 0b0000011 begin
+    if scratch_1 == 0b0000111 begin
 
         draw_poop
 

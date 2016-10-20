@@ -30,6 +30,8 @@
 :const STATE_STATS      0x04
 :const STATE_DEAD       0x05
 
+:const MAX_STAMINA      0x64
+
 : main
 
     # Display the title screen to the user
@@ -49,7 +51,7 @@
     health_stat := 0xFF
     hunger_stat := 0x40
     happy_stat := 0x40
-    stamina_stat := 0xFF
+    stamina_stat := MAX_STAMINA
 
     # At the start, the fish should point toward the right
     fish_dir := 0x01
@@ -186,6 +188,12 @@
 
 : check_event_timer
 
+    # Decrease stamina
+    scratch_1 := 0x02
+    stamina_stat -= scratch_1
+    if vf == 0 then
+        stamina_stat := 0x00
+
     # Decrease health if tank is too dirty (more than four poops)
     scratch_1 := 0b11110000
     scratch_1 &= stat_poop
@@ -255,7 +263,7 @@
 
             # Transition to sleeping state and reset stamina
             game_state := STATE_SLEEPING
-            stamina_stat := 0xFF
+            stamina_stat := MAX_STAMINA
 
             # Use scratch_2 to keep track of how long to stay sleeping
             scratch_2 := 0x0A
@@ -281,6 +289,10 @@
         # Feed fish if 'F' key is pressed
         scratch_2 := 0x0F
         if scratch_2 key begin
+
+            # The fish cannot be fed if stamina is zero
+            if stamina_stat == 0x00 then
+                return
 
             # Choose random x location in [16, 47] for fish food
             # state_val1 and state_val2 will temporarily store food x and y

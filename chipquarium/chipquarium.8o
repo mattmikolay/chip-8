@@ -38,13 +38,14 @@
     scratch_1 := key
     draw_title_screen
 
-    stat_poop := 0b10001001
-    draw_poop
-
     # Default to the swimming state
     game_state := STATE_SWIMMING
 
+    # Event timer will begin at zero and count up
+    event_timer := 0x00
+
     # Set stat defaults
+    stat_poop := 0x00
     health_stat := 0xFF
     hunger_stat := 0x40
     happy_stat := 0x40
@@ -157,7 +158,7 @@
 
     end
 
-    scratch_1 := 0x30
+    scratch_1 := 0xFF
     delay := scratch_1
 
     loop
@@ -177,7 +178,29 @@
 
     end
 
+    # Increment the event timer
+    event_timer += 0x01
+    check_event_timer
+
     jump event_loop
+
+: check_event_timer
+
+    # Event: Add a poop to the bottom of the tank
+    scratch_1 := 0b00000011
+    scratch_1 &= event_timer
+    if scratch_1 == 0b0000011 begin
+
+        draw_poop
+
+        stat_poop >>= stat_poop
+        stat_poop += 0b10000000
+
+        draw_poop
+
+    end
+
+    return
 
 #########################################################
 # Checks if a key has been pressed and reacts accordingly

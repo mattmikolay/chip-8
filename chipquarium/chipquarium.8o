@@ -14,7 +14,7 @@
 :alias fish_y v9    # y coordinate of the fishy
 :alias scratch_1 v1 # Scratch register 1
 :alias scratch_2 v2 # Scratch register 2
-:alias scratch_3 v3 # Scratch register 3
+:alias event_timer v3
 :alias hunger_stat va
 :alias happy_stat vd
 :alias stamina_stat vc
@@ -85,10 +85,10 @@
         i := sleep_bubbles_2
         sprite state_val1 state_val2 6
 
-        scratch_3 += -1
+        scratch_2 += -1
 
         # If done sleeping...
-        if scratch_3 == 0x00 begin
+        if scratch_2 == 0x00 begin
 
             # Erase sleeping bubbles
             i := sleep_bubbles_1
@@ -191,8 +191,8 @@
             game_state := STATE_SLEEPING
             stamina_stat := 0xFF
 
-            # Use scratch_3 to keep track of how long to stay sleeping
-            scratch_3 := 0x0A
+            # Use scratch_2 to keep track of how long to stay sleeping
+            scratch_2 := 0x0A
 
             return
 
@@ -316,10 +316,10 @@
     i := poop
 
     # x coordinate of poop sprite
-    scratch_3 := 0
+    state_val1 := 0
 
     # y coordinate of poop sprite
-    scratch_2 := 29
+    state_val2 := 29
 
     scratch_1 := stat_poop
 
@@ -327,9 +327,9 @@
 
         scratch_1 <<= scratch_1
         if vF != 0x00 then
-            sprite scratch_3 scratch_2 2
+            sprite state_val1 state_val2 2
 
-        scratch_3 += 8
+        state_val1 += 8
 
         if scratch_1 != 0x00 then
     again

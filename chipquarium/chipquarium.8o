@@ -20,6 +20,9 @@
 :alias stamina_stat vc
 :alias health_stat ve
 
+:const DIRECTION_LEFT   0x00
+:const DIRECTION_RIGHT  0x01
+
 :const STATE_SWIMMING   0x00
 :const STATE_FEEDING    0x01
 :const STATE_SLEEPING   0x02
@@ -61,7 +64,7 @@
         scratch_1 := random 0b00000011
 
         # If fish is facing right, increase x coordinate
-        if fish_dir == 0x01 begin
+        if fish_dir == DIRECTION_RIGHT begin
             fish_x += scratch_1
             fish_x += 1
 
@@ -103,22 +106,48 @@
 
     if game_state == STATE_FEEDING begin
 
-        # If fish is at top of screen, erase food and return to swimming state
-        if fish_y == 0x04 begin
+        # scratch_1 will store x offset of fish, moving in direction of food
+        # scratch_2 will store y offset of fish, moving in direction of food
+        scratch_1 := 0x00
+        scratch_2 := 0x00
 
+        # If fish is not at top of screen, move fish closer to food vertically
+        if fish_y != 0x04 then
+            scratch_2 := -1
+
+        # If fish's x coordinate does not equal the x coordinate of the food...
+        if fish_x != state_val1 begin
+
+            # Move fish closer to food horizontally
+            scratch_1 := fish_x
+            scratch_1 =- state_val1
+            scratch_1 := vf
+            if scratch_1 == 0 then
+                scratch_1 := -1
+
+        end
+
+        # Erase the fish sprite at its current location
+        draw_fish
+
+        fish_x += scratch_1
+        fish_y += scratch_2
+
+        # Update fish's direction based upon where it's moving
+        fish_dir := DIRECTION_LEFT
+        if scratch_1 == 0x01 then
+            fish_dir := DIRECTION_RIGHT
+
+        draw_fish
+
+        # If both x and y offset of the fish equal zero
+        scratch_1 |= scratch_2
+        if scratch_1 == 0x00 begin
+
+            # Erase food sprite and return to swimming state
             i := food
             sprite state_val1 state_val2 6
-
             game_state := STATE_SWIMMING
-
-        else
-
-            # Erase the fish sprite at its current location
-            draw_fish
-
-            fish_y += -1
-
-            draw_fish
 
         end
 
@@ -264,14 +293,14 @@
     scratch_2 := 0b11000000
     scratch_1 &= scratch_2
     if scratch_1 != 0x00 then
-        fish_dir := 0x00
+        fish_dir := DIRECTION_LEFT
 
     # Check for fish at left edge of screen
     scratch_1 := fish_x
     scratch_2 := 0b11111000
     scratch_1 &= scratch_2
     if scratch_1 == 0x00 then
-        fish_dir := 0x01
+        fish_dir := DIRECTION_RIGHT
 
     return
 
@@ -286,7 +315,7 @@
 
     # Draw an upside-down fish at the top of the tank
     fish_y := 0x00
-    fish_dir := 0x01
+    fish_dir := DIRECTION_RIGHT
     draw_flipped_fish
 
     return

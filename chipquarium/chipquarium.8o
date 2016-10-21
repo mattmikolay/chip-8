@@ -231,9 +231,10 @@
         scratch_2 := 0x0C
         if scratch_2 key begin
 
-            # Erase current poop sprites and reset poop value
+            # Clean a single poop
             draw_poop
-            stat_poop := 0x00
+            stat_poop <<= stat_poop
+            draw_poop
 
             return
 

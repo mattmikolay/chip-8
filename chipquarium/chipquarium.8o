@@ -188,6 +188,17 @@
 
 : check_event_timer
 
+    # Level up if happiness stat is high enough and enough game time has passed
+    if event_timer == 0x00 begin
+
+        scratch_1 := 128
+        scratch_1 -= happy_stat
+        if vf == 0x00 then
+            if fish_level != 0x02 then
+                fish_level += 0x01
+
+    end
+
     # Decrease stamina
     scratch_1 := 0x02
     stamina_stat -= scratch_1

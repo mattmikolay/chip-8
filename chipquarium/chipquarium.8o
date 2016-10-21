@@ -30,6 +30,7 @@
 :const STATE_STATS      0x04
 :const STATE_DEAD       0x05
 
+:const MAX_HUNGER       100
 :const MAX_STAMINA      0x64
 
 : main
@@ -49,7 +50,7 @@
     # Set stat defaults
     stat_poop := 0x00
     health_stat := 0xFF
-    hunger_stat := 0x40
+    hunger_stat := 20
     happy_stat := 0x40
     stamina_stat := MAX_STAMINA
 
@@ -204,6 +205,20 @@
     stamina_stat -= scratch_1
     if vf == 0 then
         stamina_stat := 0x00
+
+    # Increase hunger
+    if hunger_stat != MAX_HUNGER then
+        hunger_stat += 0x01
+
+    # Decrease health if fish is too hungry (hunger > 60)
+    scratch_1 := 60
+    scratch_1 =- hunger_stat
+    if vf == 0x01 begin
+
+        if health_stat != 0x00 then
+            health_stat += -1
+
+    end
 
     # Decrease health if tank is too dirty (more than four poops)
     scratch_1 := 0b11110000

@@ -112,6 +112,12 @@
 
     end
 
+    if game_state == STATE_PLAYING begin
+
+
+
+    end
+
     if game_state == STATE_FEEDING begin
 
         # scratch_1 will store x offset of fish, moving in direction of food
@@ -253,6 +259,26 @@
 
     if game_state == STATE_SWIMMING begin
 
+        # Play minigame if 'B' key is pressed
+        scratch_2 := 0x0B
+        if scratch_2 key begin
+
+            draw_fish
+
+            # Move the fish to the right edge of the screen, facing left
+            fish_x := 48
+            fish_y := 16
+            fish_dir := DIRECTION_LEFT
+
+            draw_fish
+
+            draw_minigame_field
+
+            # Transition to play state
+            game_state := STATE_PLAYING
+
+        end
+
         # Clean tank if 'C' key is pressed
         scratch_2 := 0x0C
         if scratch_2 key begin
@@ -393,6 +419,38 @@
     fish_y := 0x00
     fish_dir := DIRECTION_RIGHT
     draw_flipped_fish
+
+    return
+
+: draw_minigame_field
+
+    scratch_1 := 8
+    scratch_2 := 10
+
+    i := box_left
+    sprite scratch_1 scratch_2 11
+
+    scratch_1 := 16
+    i := box_right
+    sprite scratch_1 scratch_2 11
+
+    scratch_1 := 12
+    scratch_2 := 6
+    i := up_arrow
+    sprite scratch_1 scratch_2 3
+
+    scratch_2 := 22
+    i := down_arrow
+    sprite scratch_1 scratch_2 3
+
+    scratch_1 := 34
+    scratch_2 := 6
+    i := bubble_left
+    sprite scratch_1 scratch_2 11
+
+    scratch_1 := 42
+    i := bubble_right
+    sprite scratch_1 scratch_2 12
 
     return
 
@@ -941,8 +999,7 @@
     0b10000000
     0b10000000
     0b10000000
-    0b01011111
-    0b11100000
+    0b01111111
 
 : bubble_right
     0b11110000
@@ -956,6 +1013,7 @@
     0b00001000
     0b00001000
     0b11110000
+    0b00111000
 
 : box_left
     0b11111111

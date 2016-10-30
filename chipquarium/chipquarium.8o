@@ -27,11 +27,13 @@
 :const STATE_FEEDING    0x01
 :const STATE_SLEEPING   0x02
 :const STATE_PLAYING    0x03
+:const STATE_RPSEND     0x06
 :const STATE_STATS      0x04
 :const STATE_DEAD       0x05
 
 :const MAX_HUNGER       100
 :const MAX_STAMINA      0x64
+:const MAX_HAPPINESS    100
 
 :const GAME_ROCK        0x01
 :const GAME_PAPER       0x02
@@ -116,9 +118,123 @@
 
     end
 
+    if game_state == STATE_RPSEND begin
+
+        # End the minigame
+        if state_val2 == 0x00 begin
+
+            # Clear screen and redraw ground, poop, and fish
+            clear
+            draw_ground
+            draw_poop
+            draw_fish
+
+            # Transition to swimming state
+            game_state := STATE_SWIMMING
+
+        end
+
+        # Decrease minigame timer
+        state_val2 += -1
+
+    end
+
     if game_state == STATE_PLAYING begin
 
+        if state_val2 == 10 begin
+            i := thinking_dots_1
+            scratch_1 := 37
+            scratch_2 := 11
+            sprite scratch_1 scratch_2 1
+        end
 
+        if state_val2 == 8 begin
+            i := thinking_dots_2
+            scratch_1 := 37
+            scratch_2 := 11
+            sprite scratch_1 scratch_2 1
+        end
+
+        if state_val2 == 6 begin
+            i := thinking_dots_3
+            scratch_1 := 37
+            scratch_2 := 11
+            sprite scratch_1 scratch_2 1
+        end
+
+        # Decide the fish's move
+        if state_val2 == 4 begin
+
+            # Erase thinking dots
+            i := thinking_dots_all
+            scratch_1 := 37
+            scratch_2 := 11
+            sprite scratch_1 scratch_2 1
+ 
+            # scratch_1 will store fish's selection
+            scratch_1 := random 0x03
+
+            # If fish chose 0x00, then it's a draw
+            if scratch_1 == 0x00 then
+                scratch_1 := state_val1
+
+            # Update fish stats based upon game outcome
+            if state_val1 == GAME_SCISSORS begin
+
+                if scratch_1 == GAME_PAPER then
+                    happy_stat += 1
+                if scratch_1 == GAME_ROCK then
+                    happy_stat += -1
+
+            end
+
+            if state_val1 == GAME_ROCK begin
+
+                if scratch_1 == GAME_PAPER then
+                    happy_stat += -1
+                if scratch_1 == GAME_SCISSORS then
+                    happy_stat += 1
+
+            end
+
+            if state_val1 == GAME_PAPER begin
+
+                if scratch_1 == GAME_SCISSORS then
+                    happy_stat += -1
+                if scratch_1 == GAME_ROCK then
+                    happy_stat += 1
+
+            end
+
+            # Confirm happiness is within bounds
+            if happy_stat == 101 then
+                happy_stat := MAX_HAPPINESS
+            if happy_stat == 255 then
+                happy_stat := 0x00
+
+            load_rps_sprite
+
+            # Temporarily use state_val1 to save fish's selection
+            state_val1 := scratch_1
+
+            # Draw fish's selection
+            scratch_1 := 36
+            scratch_2 := 8
+            sprite scratch_1 scratch_2 7
+
+            # If fish chose scissors, the scissors image consists of two sprites
+            if state_val1 == GAME_SCISSORS begin
+                scratch_1 := 44
+                i := scissors_2
+                sprite scratch_1 scratch_2 6
+            end
+
+            game_state := STATE_RPSEND
+
+        end
+
+        # Decrease minigame timer
+        state_val2 += -1
 
     end
 
@@ -220,7 +336,7 @@
     if hunger_stat != MAX_HUNGER then
         hunger_stat += 0x01
 
-    # Decrease health if fish is too hungry (hunger > 60)
+    # Decrease health and happiness if fish is too hungry (hunger > 60)
     scratch_1 := 60
     scratch_1 =- hunger_stat
     if vf == 0x01 begin
@@ -228,15 +344,21 @@
         if health_stat != 0x00 then
             health_stat += -1
 
+        if happy_stat != 0x00 then
+            happy_stat += -1
+
     end
 
-    # Decrease health if tank is too dirty (more than four poops)
+    # Decrease health and happiness if tank is too dirty (more than four poops)
     scratch_1 := 0b11110000
     scratch_1 &= stat_poop
     if scratch_1 == 0b11110000 begin
 
         if health_stat != 0x00 then
             health_stat += -2
+
+        if happy_stat != 0x00 then
+            happy_stat += -1
 
     end
 
@@ -281,6 +403,9 @@
             # state_val1 will store user's rock/paper/scissors selection
             state_val1 := GAME_ROCK
             draw_rps_selection
+
+            # state_val2 will store time until the fish decides
+            state_val2 := 14
 
             # Transition to play state
             game_state := STATE_PLAYING
@@ -413,7 +538,7 @@
             draw_rps_selection
             
             state_val1 += -1
-            if state_val1 == 0xFF then
+            if state_val1 == 0x00 then
                 state_val1 := GAME_SCISSORS
 
             draw_rps_selection
@@ -505,11 +630,8 @@
 
 : draw_rps_selection
 
-    i := rock
-    if state_val1 == GAME_SCISSORS then
-        i := scissors_1
-    if state_val1 == GAME_PAPER then
-        i := paper
+    scratch_1 := state_val1
+    load_rps_sprite
 
     scratch_1 := 10
     scratch_2 := 12
@@ -522,6 +644,14 @@
     sprite scratch_1 scratch_2 6
     end
 
+    return
+
+: load_rps_sprite
+    i := rock
+    if scratch_1 == GAME_SCISSORS then
+        i := scissors_1
+    if scratch_1 == GAME_PAPER then
+        i := paper
     return
 
 #########################
@@ -1127,6 +1257,18 @@
     0b00001000
     0b00001000
     0b11111000
+
+: thinking_dots_1
+    0b10000000
+
+: thinking_dots_2
+    0b00010000
+
+: thinking_dots_3
+    0b00000010
+
+: thinking_dots_all
+    0b10010010
 
 : title_screen
     0x03 0x04 0x05 0x05 0xFF 0x2A 0xAB 0xE3

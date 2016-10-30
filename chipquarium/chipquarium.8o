@@ -389,6 +389,10 @@
         scratch_2 := 0x0B
         if scratch_2 key begin
 
+            # The fish cannot play if stamina is zero
+            if stamina_stat == 0x00 then
+                return
+
             draw_fish
 
             # Move the fish to the right edge of the screen, facing left

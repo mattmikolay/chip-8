@@ -17,24 +17,36 @@ Chipquarium was programmed using [Octo][1] assembly language as part of
 
 ### Browser
 Press the `V` key to feed your fish.
+
 Press the `4` key to clean the tank.
+
 Press the `R` key to have your fish sleep.
+
 Press the `C` key to play rock-paper-scissors with your fish.
+
 Press the `F` key to view your fish's stats.
 
 During the rock-paper-scissors minigame:
+
 Press the `2` key to cycle up through the options.
+
 Press the `S` key to cycle down through the options.
 
 ### COSMAC VIP
 Press the `F` key to feed your fish.
+
 Press the `C` key to clean the tank.
+
 Press the `D` key to have your fish sleep.
+
 Press the `B` key to play rock-paper-scissors with your fish.
+
 Press the `E` key to view your fish's stats.
 
 During the rock-paper-scissors minigame:
+
 Press the `2` key to cycle up through the options.
+
 Press the `8` key to cycle down through the options.
 
 ## Notes

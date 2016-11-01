@@ -7,8 +7,9 @@ will need to:
 * Make sure your fish never too hungry.
 * Make sure your fish is happy.
 
-And be sure your fish gets enough sleep! He will refuse to eat and play if he is
-too tired.
+If your fish is healthy and happy enough, he will eventually grow larger. But be
+sure your fish gets enough sleep! He will refuse to eat and play if he is too
+tired.
 
 Chipquarium was programmed using [Octo][1] assembly language as part of
 [Octo-ber Jam III][2].

@@ -103,7 +103,7 @@
 
     if game_state == STATE_SLEEPING begin
 
-        i := sleep_bubbles_2
+        i := sprite_sleep_bubbles_2
         sprite state_val1 state_val2 6
 
         scratch_2 += -1
@@ -112,7 +112,7 @@
         if scratch_2 == 0x00 begin
 
             # Erase sleeping bubbles
-            i := sleep_bubbles_1
+            i := sprite_sleep_bubbles_1
             sprite state_val1 state_val2 6
 
             # Return to swimming state
@@ -146,21 +146,21 @@
     if game_state == STATE_PLAYING begin
 
         if state_val2 == 10 begin
-            i := thinking_dots_1
+            i := sprite_thinking_dots_1
             scratch_1 := 37
             scratch_2 := 11
             sprite scratch_1 scratch_2 1
         end
 
         if state_val2 == 8 begin
-            i := thinking_dots_2
+            i := sprite_thinking_dots_2
             scratch_1 := 37
             scratch_2 := 11
             sprite scratch_1 scratch_2 1
         end
 
         if state_val2 == 6 begin
-            i := thinking_dots_3
+            i := sprite_thinking_dots_3
             scratch_1 := 37
             scratch_2 := 11
             sprite scratch_1 scratch_2 1
@@ -170,7 +170,7 @@
         if state_val2 == 4 begin
 
             # Erase thinking dots
-            i := thinking_dots_all
+            i := sprite_thinking_dots_all
             scratch_1 := 37
             scratch_2 := 11
             sprite scratch_1 scratch_2 1
@@ -228,7 +228,7 @@
             # If fish chose scissors, the scissors image consists of two sprites
             if state_val1 == GAME_SCISSORS begin
                 scratch_1 := 44
-                i := scissors_2
+                i := sprite_scissors_2
                 sprite scratch_1 scratch_2 6
             end
 
@@ -282,7 +282,7 @@
         if scratch_1 == 0x00 begin
 
             # Erase food sprite and return to swimming state
-            i := food
+            i := sprite_food
             sprite state_val1 state_val2 6
             game_state := STATE_SWIMMING
 
@@ -457,7 +457,7 @@
             state_val2 += -6
 
             # Draw sleep bubbles above the fish
-            i := sleep_bubbles_1
+            i := sprite_sleep_bubbles_1
             sprite state_val1 state_val2 6
 
             # Transition to sleeping state and reset stamina
@@ -499,7 +499,7 @@
             state_val1 += 16
             state_val2 := 0x00
 
-            i := food
+            i := sprite_food
             sprite state_val1 state_val2 6
 
             # Transition to feeding state and reset hunger
@@ -599,11 +599,11 @@
     draw_flipped_fish
 
     # Draw a RIP message
-    i := rip_1
+    i := sprite_rip_1
     scratch_1 := 52
     scratch_2 := 23
     sprite scratch_1 scratch_2 5
-    i := rip_2
+    i := sprite_rip_2
     scratch_1 := 60
     sprite scratch_1 scratch_2 5
 
@@ -614,29 +614,29 @@
     scratch_1 := 8
     scratch_2 := 10
 
-    i := box_left
+    i := sprite_box_left
     sprite scratch_1 scratch_2 11
 
     scratch_1 := 16
-    i := box_right
+    i := sprite_box_right
     sprite scratch_1 scratch_2 11
 
     scratch_1 := 12
     scratch_2 := 6
-    i := up_arrow
+    i := sprite_up_arrow
     sprite scratch_1 scratch_2 3
 
     scratch_2 := 22
-    i := down_arrow
+    i := sprite_down_arrow
     sprite scratch_1 scratch_2 3
 
     scratch_1 := 34
     scratch_2 := 6
-    i := bubble_left
+    i := sprite_bubble_left
     sprite scratch_1 scratch_2 11
 
     scratch_1 := 42
-    i := bubble_right
+    i := sprite_bubble_right
     sprite scratch_1 scratch_2 12
 
     return
@@ -653,18 +653,18 @@
     # The scissors image consists of two sprites
     if state_val1 == GAME_SCISSORS begin
         scratch_1 := 18
-        i := scissors_2
+        i := sprite_scissors_2
     sprite scratch_1 scratch_2 6
     end
 
     return
 
 : load_rps_sprite
-    i := rock
+    i := sprite_rock
     if scratch_1 == GAME_SCISSORS then
-        i := scissors_1
+        i := sprite_scissors_1
     if scratch_1 == GAME_PAPER then
-        i := paper
+        i := sprite_paper
     return
 
 #########################
@@ -676,7 +676,7 @@
     scratch_2 := 4
     state_val1 := 4
 
-    i := title_screen
+    i := title_screen_data
 
     loop
 
@@ -703,7 +703,7 @@
     scratch_2 := 0
     state_val1 := 8
 
-    i := win_screen
+    i := win_screen_data
 
     loop
 
@@ -726,7 +726,7 @@
 ###################################
 : draw_ground
 
-    i := ground
+    i := sprite_ground
     
     scratch_2 := 31
     scratch_1 := 0
@@ -743,7 +743,7 @@
 ###########################################################
 : draw_poop
 
-    i := poop
+    i := sprite_poop
 
     # x coordinate of poop sprite
     state_val1 := 0
@@ -803,47 +803,47 @@
 
     scratch_2 := 4
 
-    i := hunger_text_1
+    i := sprite_hunger_text_1
     sprite scratch_2 scratch_2 5
 
     scratch_1 := 12
-    i := hunger_text_2
+    i := sprite_hunger_text_2
     sprite scratch_1 scratch_2 5
 
     scratch_1 := 20
-    i := hunger_text_3
+    i := sprite_hunger_text_3
     sprite scratch_1 scratch_2 5
 
     scratch_2 := 13
 
     scratch_1 := 4
-    i := happy_text_1
+    i := sprite_happy_text_1
     sprite scratch_1 scratch_2 5
 
     scratch_1 := 12
-    i := happy_text_2
+    i := sprite_happy_text_2
     sprite scratch_1 scratch_2 5
 
     scratch_1 := 20
-    i := happy_text_3
+    i := sprite_happy_text_3
     sprite scratch_1 scratch_2 5
 
     scratch_2 := 22
 
     scratch_1 := 4
-    i := stamina_text_1
+    i := sprite_stamina_text_1
     sprite scratch_1 scratch_2 5
 
     scratch_1 := 12
-    i := stamina_text_2
+    i := sprite_stamina_text_2
     sprite scratch_1 scratch_2 5
 
     scratch_1 := 20
-    i := stamina_text_3
+    i := sprite_stamina_text_3
     sprite scratch_1 scratch_2 5
 
     scratch_1 := 28
-    i := stamina_text_4
+    i := sprite_stamina_text_4
     sprite scratch_1 scratch_2 5
 
     # Store BCD of hunger stat
@@ -934,9 +934,9 @@
 #######################################################
 : draw_small_fish
 
-    i := small_fish_left
+    i := sprite_small_fish_left
     if fish_dir == 0x01 then
-        i := small_fish_right
+        i := sprite_small_fish_right
 
     sprite fish_x fish_y 3
     return
@@ -946,9 +946,9 @@
 ########################################################
 : draw_medium_fish
 
-    i := medium_fish_left
+    i := sprite_medium_fish_left
     if fish_dir == 0x01 then
-        i := medium_fish_right
+        i := sprite_medium_fish_right
 
     sprite fish_x fish_y 4
     return
@@ -957,7 +957,7 @@
 # Draws a medium upside-down fish sprite on screen at fish_x, fish_y
 ####################################################################
 : draw_medium_flipped_fish
-    i := medium_flipped_fish
+    i := sprite_medium_flipped_fish
     sprite fish_x fish_y 4
     return
 
@@ -967,17 +967,17 @@
 : draw_large_fish
 
     # Draw the left half of the large fish sprite
-    i := large_fish_1_left
+    i := sprite_large_fish_1_left
     if fish_dir == 0x01 then
-        i := large_fish_1_right
+        i := sprite_large_fish_1_right
     sprite fish_x fish_y 8
 
     fish_x += 8
 
     # Draw the right half of the large fish sprite
-    i := large_fish_2_left
+    i := sprite_large_fish_2_left
     if fish_dir == 0x01 then
-        i := large_fish_2_right
+        i := sprite_large_fish_2_right
     sprite fish_x fish_y 8
 
     fish_x += -8
@@ -990,25 +990,25 @@
 : draw_large_flipped_fish
 
     # Draw the left half of the large fish sprite
-    i := large_flipped_fish_1
+    i := sprite_large_flipped_fish_1
     sprite fish_x fish_y 6
 
     fish_x += 8
 
     # Draw the right half of the large fish sprite
-    i := large_flipped_fish_2
+    i := sprite_large_flipped_fish_2
     sprite fish_x fish_y 6
 
     return
 
-: ground
+: sprite_ground
     0b11111111
 
-: poop
+: sprite_poop
     0b00011000
     0b00111100
 
-: food
+: sprite_food
     0b10000000
     0b00010000
     0b01000000
@@ -1016,7 +1016,7 @@
     0b10000000
     0b00100000
 
-: sleep_bubbles_1
+: sprite_sleep_bubbles_1
     0b10000000
     0b00000000
     0b10000000
@@ -1024,7 +1024,7 @@
     0b10000000
     0b00000000
 
-: sleep_bubbles_2
+: sprite_sleep_bubbles_2
     0b10000000
     0b10000000
     0b10000000
@@ -1032,35 +1032,35 @@
     0b10000000
     0b10000000
 
-: small_fish_left
+: sprite_small_fish_left
     0b01101000
     0b11110000
     0b01101000
 
-: small_fish_right
+: sprite_small_fish_right
     0b10110000
     0b01111000
     0b10110000
 
-: medium_fish_left
+: sprite_medium_fish_left
     0b01111011
     0b10111110
     0b11111110
     0b01111011   
 
-: medium_fish_right
+: sprite_medium_fish_right
     0b11011110
     0b01111101
     0b01111111
     0b11011110
 
-: medium_flipped_fish
+: sprite_medium_flipped_fish
     0b11011110
     0b01111111
     0b01111111
     0b11011110
 
-: large_fish_1_left
+: sprite_large_fish_1_left
     0b01110000
     0b10001000
     0b10011111
@@ -1070,7 +1070,7 @@
     0b00000011
     0b00011111
 
-: large_fish_2_left
+: sprite_large_fish_2_left
     0b00000000
     0b00000000
     0b10000000
@@ -1080,7 +1080,7 @@
     0b11010000
     0b10011000
 
-: large_fish_1_right
+: sprite_large_fish_1_right
     0b00000000
     0b00000000
     0b00001111
@@ -1090,7 +1090,7 @@
     0b01011110
     0b11001111
 
-: large_fish_2_right
+: sprite_large_fish_2_right
     0b01110000
     0b10001000
     0b11001000
@@ -1100,7 +1100,7 @@
     0b00000000
     0b11000000
 
-: large_flipped_fish_1
+: sprite_large_flipped_fish_1
     0b11001111
     0b01011110
     0b00111111
@@ -1108,7 +1108,7 @@
     0b11011111
     0b00001111
 
-: large_flipped_fish_2
+: sprite_large_flipped_fish_2
     0b11000000
     0b00000000
     0b11100000
@@ -1116,101 +1116,101 @@
     0b11100000
     0b11000000
 
-: rip_1
+: sprite_rip_1
     0b11001110
     0b10100100
     0b11000100
     0b10100100
     0b10101110
 
-: rip_2
+: sprite_rip_2
     0b11100000
     0b10100000
     0b11100000
     0b10000000
     0b10000000
 
-: hunger_text_1
+: sprite_hunger_text_1
     0b10101010
     0b10101010
     0b11101010
     0b10101010
     0b10101110
 
-: hunger_text_2
+: sprite_hunger_text_2
     0b11001110
     0b10101000
     0b10101010
     0b10101010
     0b10101110
 
-: hunger_text_3
+: sprite_hunger_text_3
     0b11101100
     0b10001010
     0b11001100
     0b10001010
     0b11101010
 
-: happy_text_1
+: sprite_happy_text_1
     0b10101110
     0b10101010
     0b11101110
     0b10101010
     0b10101010
 
-: happy_text_2
+: sprite_happy_text_2
     0b11101110
     0b10101010 
     0b11101110 
     0b10001000 
     0b10001000
 
-: happy_text_3
+: sprite_happy_text_3
     0b10100000
     0b10100000
     0b11100000
     0b01000000
     0b01000000
 
-: stamina_text_1
+: sprite_stamina_text_1
     0b11101110
     0b10000100
     0b11100100
     0b00100100
     0b11100100
 
-: stamina_text_2
+: sprite_stamina_text_2
     0b11101111
     0b10101010
     0b11101010
     0b10101010
     0b10101010
 
-: stamina_text_3
+: sprite_stamina_text_3
     0b10111011
     0b10010010
     0b10010010
     0b10010010
     0b10111010
 
-: stamina_text_4
+: sprite_stamina_text_4
     0b00111000
     0b10101000
     0b10111000
     0b10101000
     0b10101000
 
-: up_arrow
+: sprite_up_arrow
     0b00100000
     0b01110000
     0b11111000
 
-: down_arrow
+: sprite_down_arrow
     0b11111000
     0b01110000
     0b00100000
 
-: rock
+: sprite_rock
     0b00000000
     0b00011100
     0b00111110
@@ -1219,7 +1219,7 @@
     0b00111110
     0b00000000
 
-: paper
+: sprite_paper
     0b01111110
     0b01001011
     0b01001001
@@ -1228,7 +1228,7 @@
     0b01000001
     0b01111111
 
-: scissors_1
+: sprite_scissors_1
     0b01000011
     0b10100111
     0b01101100
@@ -1237,7 +1237,7 @@
     0b10100111
     0b01000011
 
-: scissors_2
+: sprite_scissors_2
     0b00000000
     0b10000000
     0b00000000
@@ -1245,7 +1245,7 @@
     0b00000000
     0b10000000
 
-: bubble_left
+: sprite_bubble_left
     0b01111111
     0b10000000
     0b10000000
@@ -1258,7 +1258,7 @@
     0b10000000
     0b01111111
 
-: bubble_right
+: sprite_bubble_right
     0b11110000
     0b00001000
     0b00001000
@@ -1272,7 +1272,7 @@
     0b11110000
     0b00111000
 
-: box_left
+: sprite_box_left
     0b11111111
     0b10000000
     0b10000000
@@ -1285,7 +1285,7 @@
     0b10000000
     0b11111111
 
-: box_right
+: sprite_box_right
     0b11111000
     0b00001000
     0b00001000
@@ -1298,19 +1298,19 @@
     0b00001000
     0b11111000
 
-: thinking_dots_1
+: sprite_thinking_dots_1
     0b10000000
 
-: thinking_dots_2
+: sprite_thinking_dots_2
     0b00010000
 
-: thinking_dots_3
+: sprite_thinking_dots_3
     0b00000010
 
-: thinking_dots_all
+: sprite_thinking_dots_all
     0b10010010
 
-: title_screen
+: title_screen_data
     0x03 0x04 0x05 0x05 0xFF 0x2A 0xAB 0xE3
     0xFF 0x21 0x6D 0x6D 0xFF 0x0B 0x6B 0x6B
     0xFF 0x66 0x5A 0x5A 0xFF 0x31 0xDB 0xDB
@@ -1336,7 +1336,7 @@
     0xA2 0xA3 0x22 0x3A 0xA8 0xB8 0x90 0x90
     0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
 
-: win_screen
+: win_screen_data
     0x00 0x00 0x00 0x57 0x55 0x75 0x25 0x27
     0x00 0x00 0x00 0x51 0x51 0x51 0x51 0x71
     0x00 0x00 0x00 0x17 0x52 0x52 0x52 0xF7

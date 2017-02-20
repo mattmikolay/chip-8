@@ -336,7 +336,8 @@
     # Level up if happiness stat is high enough and enough game time has passed
     if event_timer == 0x00 begin
 
-        scratch_1 := 128
+        # If happy_stat > 74
+        scratch_1 := 74
         scratch_1 -= happy_stat
         if vf == 0x00 then
             if fish_level != LEVEL_VICTORY then

@@ -35,6 +35,7 @@
 :const STATE_STATS      0x04
 :const STATE_DEAD       0x05
 
+:const MAX_HEALTH       255
 :const MAX_HUNGER       100
 :const MAX_STAMINA      0x64
 :const MAX_HAPPINESS    100
@@ -59,7 +60,7 @@
 
     # Set stat defaults
     stat_poop := 0x00
-    health_stat := 0xFF
+    health_stat := MAX_HEALTH
     hunger_stat := 20
     happy_stat := 0x40
     stamina_stat := MAX_STAMINA

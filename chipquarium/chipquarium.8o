@@ -9,7 +9,7 @@
 :alias state_val2 v5
 :alias game_state v4 # Game state
 :alias fish_level v6 # Fish level (0 = small, 1 = medium, 2 = large, 3 = win)
-:alias fish_dir v7  # Direction of the fishy (0x00 = left, 0x01 = right)
+:alias fish_dir v7  # Direction of the fishy (DIRECTION_LEFT or DIRECTION_RIGHT)
 :alias fish_x v8    # x coordinate of the fishy
 :alias fish_y v9    # y coordinate of the fishy
 :alias scratch_1 v1 # Scratch register 1
@@ -61,7 +61,7 @@
     stamina_stat := MAX_STAMINA
 
     # At the start, the fish should point toward the right
-    fish_dir := 0x01
+    fish_dir := DIRECTION_RIGHT
 
     # Begin with a small fish!
     fish_level := 0x00
@@ -960,7 +960,7 @@
 : draw_small_fish
 
     i := sprite_small_fish_left
-    if fish_dir == 0x01 then
+    if fish_dir == DIRECTION_RIGHT then
         i := sprite_small_fish_right
 
     sprite fish_x fish_y 3
@@ -972,7 +972,7 @@
 : draw_medium_fish
 
     i := sprite_medium_fish_left
-    if fish_dir == 0x01 then
+    if fish_dir == DIRECTION_RIGHT then
         i := sprite_medium_fish_right
 
     sprite fish_x fish_y 4
@@ -993,7 +993,7 @@
 
     # Draw the left half of the large fish sprite
     i := sprite_large_fish_1_left
-    if fish_dir == 0x01 then
+    if fish_dir == DIRECTION_RIGHT then
         i := sprite_large_fish_1_right
     sprite fish_x fish_y 8
 
@@ -1001,7 +1001,7 @@
 
     # Draw the right half of the large fish sprite
     i := sprite_large_fish_2_left
-    if fish_dir == 0x01 then
+    if fish_dir == DIRECTION_RIGHT then
         i := sprite_large_fish_2_right
     sprite fish_x fish_y 8
 

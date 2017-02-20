@@ -322,6 +322,10 @@
 : idle
     jump idle
 
+##########################################################################
+# Checks the event timer and updates accordingly. The fish's stats and the
+# tank's dirtiness are updated as time passes.
+##########################################################################
 : check_event_timer
 
     # Level up if happiness stat is high enough and enough game time has passed
@@ -387,9 +391,9 @@
 
     return
 
-#########################################################
-# Checks if a key has been pressed and reacts accordingly
-#########################################################
+##############################################################
+# Checks if a key has been pressed and handles it accordingly.
+##############################################################
 : check_key
 
     if game_state == STATE_SWIMMING begin
@@ -562,9 +566,9 @@
 
     return
 
-#########################################################################
-# Updates the fish's direction, if the fish has hit one of the boundaries
-#########################################################################
+##########################################################################
+# Updates the fish's direction, if the fish has hit one of the boundaries.
+##########################################################################
 : update_direction
 
     # Check for fish at right edge of screen
@@ -584,7 +588,9 @@
 
     return
 
+###########################################################################
 # Ends the game, preventing further user interaction. Rest in peace, fishy.
+###########################################################################
 : end_game
 
     # If the fish has already gone to fishy heaven, there's nothing to do
@@ -609,38 +615,53 @@
 
     return
 
+#############################################################################
+# Draws the rock/paper/scissors minigame field. The field consists of a box
+# indicating the user's selection; up and down arrows; and the fish's thought
+# bubble.
+#############################################################################
 : draw_minigame_field
 
     scratch_1 := 8
     scratch_2 := 10
 
+    # Draw left half of box indicating user's selection
     i := sprite_box_left
     sprite scratch_1 scratch_2 11
 
+    # Draw right half of box indicating user's selection
     scratch_1 := 16
     i := sprite_box_right
     sprite scratch_1 scratch_2 11
 
+    # Draw up arrow
     scratch_1 := 12
     scratch_2 := 6
     i := sprite_up_arrow
     sprite scratch_1 scratch_2 3
 
+    # Draw down arrow
     scratch_2 := 22
     i := sprite_down_arrow
     sprite scratch_1 scratch_2 3
 
+    # Draw left half of the fish's thought bubble
     scratch_1 := 34
     scratch_2 := 6
     i := sprite_bubble_left
     sprite scratch_1 scratch_2 11
 
+    # Draw right half of the fish's thought bubble
     scratch_1 := 42
     i := sprite_bubble_right
     sprite scratch_1 scratch_2 12
 
     return
 
+##############################################################################
+# Draws the sprite corresponding to the user's selection at this moment in the
+# rock/paper/scissors minigame.
+##############################################################################
 : draw_rps_selection
 
     scratch_1 := state_val1
@@ -659,6 +680,10 @@
 
     return
 
+###############################################################################
+# Loads the i register with the sprite corresponding to the user's selection at
+# this moment in the rock/paper/scissors minigame.
+###############################################################################
 : load_rps_sprite
     i := sprite_rock
     if scratch_1 == GAME_SCISSORS then
@@ -721,9 +746,9 @@
 
     return
 
-###################################
-# Draws the bottom of the fish tank
-###################################
+####################################
+# Draws the bottom of the fish tank.
+####################################
 : draw_ground
 
     i := sprite_ground
@@ -738,9 +763,9 @@
     again
     return
 
-###########################################################
-# Draws a row of fish droppings at the bottom of the screen
-###########################################################
+############################################################
+# Draws a row of fish droppings at the bottom of the screen.
+############################################################
 : draw_poop
 
     i := sprite_poop
@@ -929,9 +954,9 @@
 
     return
 
-#######################################################
-# Draws a small fish sprite on screen at fish_x, fish_y
-#######################################################
+########################################################
+# Draws a small fish sprite on screen at fish_x, fish_y.
+########################################################
 : draw_small_fish
 
     i := sprite_small_fish_left
@@ -941,9 +966,9 @@
     sprite fish_x fish_y 3
     return
 
-########################################################
-# Draws a medium fish sprite on screen at fish_x, fish_y
-########################################################
+#########################################################
+# Draws a medium fish sprite on screen at fish_x, fish_y.
+#########################################################
 : draw_medium_fish
 
     i := sprite_medium_fish_left
@@ -953,17 +978,17 @@
     sprite fish_x fish_y 4
     return
 
-####################################################################
-# Draws a medium upside-down fish sprite on screen at fish_x, fish_y
-####################################################################
+#####################################################################
+# Draws a medium upside-down fish sprite on screen at fish_x, fish_y.
+#####################################################################
 : draw_medium_flipped_fish
     i := sprite_medium_flipped_fish
     sprite fish_x fish_y 4
     return
 
-#######################################################
-# Draws a large fish sprite on screen at fish_x, fish_y
-#######################################################
+########################################################
+# Draws a large fish sprite on screen at fish_x, fish_y.
+########################################################
 : draw_large_fish
 
     # Draw the left half of the large fish sprite
@@ -984,9 +1009,9 @@
 
     return
 
-###################################################################
-# Draws a large upside-down fish sprite on screen at fish_x, fish_y
-###################################################################
+####################################################################
+# Draws a large upside-down fish sprite on screen at fish_x, fish_y.
+####################################################################
 : draw_large_flipped_fish
 
     # Draw the left half of the large fish sprite

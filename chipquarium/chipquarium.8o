@@ -453,13 +453,20 @@
 
             # state_val1 will temporarily store bubbles x
             state_val1 := fish_x
-            state_val1 += 5
+            state_val1 += -1
 
-            # Adjust bubble x based upon fish width
-            if fish_level == LEVEL_MEDIUM then
-                state_val1 += 3
-            if fish_level == LEVEL_LARGE then
-                state_val1 += 9
+            # Shift bubbles to the right if the fish is facing right
+            if fish_dir == DIRECTION_RIGHT begin
+
+                state_val1 += 6
+
+                # Adjust bubble x based upon fish width
+                if fish_level == LEVEL_MEDIUM then
+                    state_val1 += 4
+                if fish_level == LEVEL_LARGE then
+                    state_val1 += 10
+
+            end
 
             # state_val2 will temporarily store bubbles y
             state_val2 := fish_y

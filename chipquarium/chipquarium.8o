@@ -3,22 +3,26 @@
 # For licensing info, please see accompanying LICENSE file.
 # See github.com/mattmikolay/chip-8 or mattmik.com for more info.
 
-:alias stat_poop vB
-
-:alias state_val1 v0
-:alias state_val2 v5
-:alias game_state v4 # Game state
-:alias fish_level v6 # Fish level (0 = small, 1 = medium, 2 = large, 3 = win)
-:alias fish_dir v7  # Direction of the fishy (DIRECTION_LEFT or DIRECTION_RIGHT)
-:alias fish_x v8    # x coordinate of the fishy
-:alias fish_y v9    # y coordinate of the fishy
-:alias scratch_1 v1 # Scratch register 1
-:alias scratch_2 v2 # Scratch register 2
-:alias event_timer v3
-:alias hunger_stat va
-:alias happy_stat vd
+:alias stat_poop    vB      # Tank dirtiness
+:alias state_val1   v0      # State-dependent value (use varies with game_state)
+:alias state_val2   v5      # State-dependent value (use varies with game_state)
+:alias game_state   v4      # Game state
+:alias fish_level   v6      # Fish level
+:alias fish_dir     v7      # Direction of the fishy
+:alias fish_x       v8      # x coordinate of the fishy
+:alias fish_y       v9      # y coordinate of the fishy
+:alias scratch_1    v1      # Scratch register 1
+:alias scratch_2    v2      # Scratch register 2
+:alias event_timer  v3
+:alias hunger_stat  va
+:alias happy_stat   vd
 :alias stamina_stat vc
-:alias health_stat ve
+:alias health_stat  ve
+
+:const LEVEL_SMALL      0x00
+:const LEVEL_MEDIUM     0x01
+:const LEVEL_LARGE      0x02
+:const LEVEL_VICTORY    0x03
 
 :const DIRECTION_LEFT   0x00
 :const DIRECTION_RIGHT  0x01
@@ -64,7 +68,7 @@
     fish_dir := DIRECTION_RIGHT
 
     # Begin with a small fish!
-    fish_level := 0x00
+    fish_level := LEVEL_SMALL
 
 : event_loop
 
@@ -73,7 +77,7 @@
         end_game
 
     # If fish is level 3, the user has won
-    if fish_level == 0x03 then
+    if fish_level == LEVEL_VICTORY then
         jump win_game
 
     if game_state == STATE_SWIMMING begin
@@ -334,7 +338,7 @@
         scratch_1 := 128
         scratch_1 -= happy_stat
         if vf == 0x00 then
-            if fish_level != 0x03 then
+            if fish_level != LEVEL_VICTORY then
                 fish_level += 0x01
 
     end
@@ -451,9 +455,9 @@
             state_val1 += 5
 
             # Adjust bubble x based upon fish width
-            if fish_level == 0x01 then
+            if fish_level == LEVEL_MEDIUM then
                 state_val1 += 3
-            if fish_level == 0x02 then
+            if fish_level == LEVEL_LARGE then
                 state_val1 += 9
 
             # state_val2 will temporarily store bubbles y
@@ -797,11 +801,11 @@
 ########################################################
 : draw_fish
 
-    if fish_level == 0x00 then
+    if fish_level == LEVEL_SMALL then
         draw_small_fish
-    if fish_level == 0x01 then
+    if fish_level == LEVEL_MEDIUM then
         draw_medium_fish
-    if fish_level == 0x02 then
+    if fish_level == LEVEL_LARGE then
         draw_large_fish
 
     return
@@ -812,11 +816,11 @@
 ###################################################################
 : draw_flipped_fish
 
-    if fish_level == 0x00 then
+    if fish_level == LEVEL_SMALL then
         draw_small_fish
-    if fish_level == 0x01 then
+    if fish_level == LEVEL_MEDIUM then
         draw_medium_flipped_fish
-    if fish_level == 0x02 then
+    if fish_level == LEVEL_LARGE then
         draw_large_flipped_fish
 
     return

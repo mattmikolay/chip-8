@@ -51,10 +51,6 @@ Press the `2` key to cycle up through the options.
 Press the `8` key to cycle down through the options.
 
 ## Notes
-In its current form, the game is playable, but I'll likely make some
-improvements in the future. I think the stats engine and minigame could use some
-more work, and I also plan on adding an ending screen.
-
 Chipquarium was written using the original CHIP-8 instruction set. As a result,
 it should run on the [COSMAC VIP][3] without any issues.
 

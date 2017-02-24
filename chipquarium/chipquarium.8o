@@ -190,7 +190,7 @@
             if state_val1 == GAME_SCISSORS begin
 
                 if scratch_1 == GAME_PAPER then
-                    happy_stat += 1
+                    happy_stat += 2
                 if scratch_1 == GAME_ROCK then
                     happy_stat += -1
 
@@ -201,7 +201,7 @@
                 if scratch_1 == GAME_PAPER then
                     happy_stat += -1
                 if scratch_1 == GAME_SCISSORS then
-                    happy_stat += 1
+                    happy_stat += 2
 
             end
 
@@ -210,15 +210,17 @@
                 if scratch_1 == GAME_SCISSORS then
                     happy_stat += -1
                 if scratch_1 == GAME_ROCK then
-                    happy_stat += 1
+                    happy_stat += 2
 
             end
 
             # Confirm happiness is within bounds
-            if happy_stat == 101 then
-                happy_stat := MAX_HAPPINESS
             if happy_stat == 255 then
                 happy_stat := 0x00
+            state_val1 := MAX_HAPPINESS
+            state_val1 -= happy_stat
+            if vf == 0x00 then
+                happy_stat := MAX_HAPPINESS
 
             load_rps_sprite
 
@@ -336,8 +338,8 @@
     # Level up if happiness stat is high enough and enough game time has passed
     if event_timer == 0x00 begin
 
-        # If happy_stat > 74
-        scratch_1 := 74
+        # If happy_stat > 68
+        scratch_1 := 68
         scratch_1 -= happy_stat
         if vf == 0x00 then
             if fish_level != LEVEL_VICTORY then

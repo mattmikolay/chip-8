@@ -384,17 +384,19 @@
     end
 
     # Event: Add a poop to the bottom of the tank
-    scratch_1 := 0b00001111
-    scratch_1 &= event_timer
-    if scratch_1 == 0b0001111 begin
+    if stat_poop != 0b11111111 begin
+        scratch_1 := 0b00001111
+        scratch_1 &= event_timer
+        if scratch_1 == 0b0001111 begin
 
-        draw_poop
+            draw_poop
 
-        stat_poop >>= stat_poop
-        stat_poop += 0b10000000
+            stat_poop >>= stat_poop
+            stat_poop += 0b10000000
 
-        draw_poop
+            draw_poop
 
+        end
     end
 
     return

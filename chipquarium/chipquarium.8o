@@ -256,7 +256,7 @@
         scratch_2 := 0x00
 
         # If fish is not at top of screen, move fish closer to food vertically
-        if fish_y != 0x04 then
+        if fish_y != 0x06 then
             scratch_2 := -1
 
         # If fish's x coordinate does not equal the x coordinate of the food...

@@ -1,0 +1,1420 @@
+# Chipquarium
+# Copyright 2016 Matthew Mikolay
+# For licensing info, please see accompanying LICENSE file.
+# See github.com/mattmikolay/chip-8 or mattmik.com for more info.
+
+:alias stat_poop    vB      # Tank dirtiness
+:alias state_val1   v0      # State-dependent value (use varies with game_state)
+:alias state_val2   v5      # State-dependent value (use varies with game_state)
+:alias game_state   v4      # Game state
+:alias fish_level   v6      # Fish level
+:alias fish_dir     v7      # Direction of the fishy
+:alias fish_x       v8      # x coordinate of the fishy
+:alias fish_y       v9      # y coordinate of the fishy
+:alias scratch_1    v1      # Scratch register 1
+:alias scratch_2    v2      # Scratch register 2
+:alias event_timer  v3
+:alias hunger_stat  va
+:alias happy_stat   vd
+:alias stamina_stat vc
+:alias health_stat  ve
+
+:const LEVEL_SMALL      0x00
+:const LEVEL_MEDIUM     0x01
+:const LEVEL_LARGE      0x02
+:const LEVEL_VICTORY    0x03
+
+:const DIRECTION_LEFT   0x00
+:const DIRECTION_RIGHT  0x01
+
+:const STATE_SWIMMING   0x00
+:const STATE_FEEDING    0x01
+:const STATE_SLEEPING   0x02
+:const STATE_PLAYING    0x03
+:const STATE_RPSEND     0x06
+:const STATE_STATS      0x04
+:const STATE_DEAD       0x05
+
+:const MAX_HEALTH       255
+:const MAX_HUNGER       100
+:const MAX_STAMINA      0x64
+:const MAX_HAPPINESS    100
+
+:const GAME_ROCK        0x01
+:const GAME_PAPER       0x02
+:const GAME_SCISSORS    0x03
+
+: main
+
+    # Display the title screen to the user
+    draw_title_screen
+    draw_ground
+    scratch_1 := key
+    draw_title_screen
+
+    # Default to the swimming state
+    game_state := STATE_SWIMMING
+
+    # Event timer will begin at zero and count up
+    event_timer := 0x00
+
+    # Set stat defaults
+    stat_poop := 0x00
+    health_stat := MAX_HEALTH
+    hunger_stat := 20
+    happy_stat := 0x40
+    stamina_stat := MAX_STAMINA
+
+    # At the start, the fish should point toward the right
+    fish_dir := DIRECTION_RIGHT
+
+    # Begin with a small fish!
+    fish_level := LEVEL_SMALL
+
+: event_loop
+
+    # If fish health hits zero, the game is over
+    if health_stat == 0x00 then
+        end_game
+
+    # If fish is level 3, the user has won
+    if fish_level == LEVEL_VICTORY then
+        jump win_game
+
+    if game_state == STATE_SWIMMING begin
+
+        # Choose a random x offset in [1,4] for the fish
+        scratch_1 := random 0b00000011
+
+        # If fish is facing right, increase x coordinate
+        if fish_dir == DIRECTION_RIGHT begin
+            fish_x += scratch_1
+            fish_x += 1
+
+        # If fish is facing left, decrease x coordinate
+        else
+            fish_x -= scratch_1
+            fish_x += -1
+        end
+
+        # Choose a random y coordinate in [6,21] for the fish
+        fish_y := random 0x0F
+        fish_y += 6
+
+        # Draw the fish sprite at the newly calculated position
+        draw_fish
+
+    end
+
+    if game_state == STATE_SLEEPING begin
+
+        i := sprite_sleep_bubbles_2
+        sprite state_val1 state_val2 6
+
+        scratch_2 += -1
+
+        # If done sleeping...
+        if scratch_2 == 0x00 begin
+
+            # Erase sleeping bubbles
+            i := sprite_sleep_bubbles_1
+            sprite state_val1 state_val2 6
+
+            # Return to swimming state
+            game_state := STATE_SWIMMING
+
+        end
+
+    end
+
+    if game_state == STATE_RPSEND begin
+
+        # End the minigame
+        if state_val2 == 0x00 begin
+
+            # Clear screen and redraw ground, poop, and fish
+            clear
+            draw_ground
+            draw_poop
+            draw_fish
+
+            # Transition to swimming state
+            game_state := STATE_SWIMMING
+
+        end
+
+        # Decrease minigame timer
+        state_val2 += -1
+
+    end
+
+    if game_state == STATE_PLAYING begin
+
+        if state_val2 == 10 begin
+            i := sprite_thinking_dots_1
+            scratch_1 := 37
+            scratch_2 := 11
+            sprite scratch_1 scratch_2 1
+        end
+
+        if state_val2 == 8 begin
+            i := sprite_thinking_dots_2
+            scratch_1 := 37
+            scratch_2 := 11
+            sprite scratch_1 scratch_2 1
+        end
+
+        if state_val2 == 6 begin
+            i := sprite_thinking_dots_3
+            scratch_1 := 37
+            scratch_2 := 11
+            sprite scratch_1 scratch_2 1
+        end
+
+        # Decide the fish's move
+        if state_val2 == 4 begin
+
+            # Erase thinking dots
+            i := sprite_thinking_dots_all
+            scratch_1 := 37
+            scratch_2 := 11
+            sprite scratch_1 scratch_2 1
+ 
+            # scratch_1 will store fish's selection, a random number in [1,3]
+            scratch_1 := random 0x01
+            scratch_2 := random 0x01
+            scratch_1 += scratch_2
+            scratch_1 += 0x01
+
+            # Update fish stats based upon game outcome
+            if state_val1 == GAME_SCISSORS begin
+
+                if scratch_1 == GAME_PAPER then
+                    happy_stat += 2
+                if scratch_1 == GAME_ROCK then
+                    happy_stat += -1
+
+            end
+
+            if state_val1 == GAME_ROCK begin
+
+                if scratch_1 == GAME_PAPER then
+                    happy_stat += -1
+                if scratch_1 == GAME_SCISSORS then
+                    happy_stat += 2
+
+            end
+
+            if state_val1 == GAME_PAPER begin
+
+                if scratch_1 == GAME_SCISSORS then
+                    happy_stat += -1
+                if scratch_1 == GAME_ROCK then
+                    happy_stat += 2
+
+            end
+
+            # Confirm happiness is within bounds
+            if happy_stat == 255 then
+                happy_stat := 0x00
+            state_val1 := MAX_HAPPINESS
+            state_val1 -= happy_stat
+            if vf == 0x00 then
+                happy_stat := MAX_HAPPINESS
+
+            load_rps_sprite
+
+            # Temporarily use state_val1 to save fish's selection
+            state_val1 := scratch_1
+
+            # Draw fish's selection
+            scratch_1 := 36
+            scratch_2 := 8
+            sprite scratch_1 scratch_2 7
+
+            # If fish chose scissors, the scissors image consists of two sprites
+            if state_val1 == GAME_SCISSORS begin
+                scratch_1 := 44
+                i := sprite_scissors_2
+                sprite scratch_1 scratch_2 6
+            end
+
+            game_state := STATE_RPSEND
+
+        end
+
+        # Decrease minigame timer
+        state_val2 += -1
+
+    end
+
+    if game_state == STATE_FEEDING begin
+
+        # scratch_1 will store x offset of fish, moving in direction of food
+        # scratch_2 will store y offset of fish, moving in direction of food
+        scratch_1 := 0x00
+        scratch_2 := 0x00
+
+        # If fish is not at top of screen, move fish closer to food vertically
+        if fish_y != 0x06 then
+            scratch_2 := -1
+
+        # If fish's x coordinate does not equal the x coordinate of the food...
+        if fish_x != state_val1 begin
+
+            # Move fish closer to food horizontally
+            scratch_1 := fish_x
+            scratch_1 =- state_val1
+            scratch_1 := vf
+            if scratch_1 == 0 then
+                scratch_1 := -1
+
+        end
+
+        # Erase the fish sprite at its current location
+        draw_fish
+
+        fish_x += scratch_1
+        fish_y += scratch_2
+
+        # Update fish's direction based upon where it's moving
+        fish_dir := DIRECTION_LEFT
+        if scratch_1 == 0x01 then
+            fish_dir := DIRECTION_RIGHT
+
+        draw_fish
+
+        # If both x and y offset of the fish equal zero
+        scratch_1 |= scratch_2
+        if scratch_1 == 0x00 begin
+
+            # Erase food sprite and return to swimming state
+            i := sprite_food
+            sprite state_val1 state_val2 6
+            game_state := STATE_SWIMMING
+
+        end
+
+    end
+
+    scratch_1 := 30
+    delay := scratch_1
+
+    loop
+
+        check_key
+
+        scratch_1 := delay
+        while scratch_1 != 0x00
+    again
+
+    if game_state == STATE_SWIMMING begin
+
+        # Erase the fish sprite at its current location
+        draw_fish
+
+        update_direction
+
+        # Increment the event timer
+        event_timer += 0x01
+        check_event_timer
+
+    end
+
+    jump event_loop
+
+: win_game
+    clear
+    draw_win_screen
+: idle
+    jump idle
+
+##########################################################################
+# Checks the event timer and updates accordingly. The fish's stats and the
+# tank's dirtiness are updated as time passes.
+##########################################################################
+: check_event_timer
+
+    # Level up if happiness stat is high enough and enough game time has passed
+    if event_timer == 0x00 begin
+
+        # If happy_stat > 72
+        scratch_1 := 72
+        scratch_1 -= happy_stat
+        if vf == 0x00 then
+            if fish_level != LEVEL_VICTORY then
+                fish_level += 0x01
+
+    end
+
+    # Decrease stamina
+    scratch_1 := 0x02
+    stamina_stat -= scratch_1
+    if vf == 0 then
+        stamina_stat := 0x00
+
+    # Increase hunger
+    if hunger_stat != MAX_HUNGER then
+        hunger_stat += 0x01
+
+    # Decrease health and happiness if fish is too hungry (hunger > 80)
+    scratch_1 := 80
+    scratch_1 =- hunger_stat
+    if vf == 0x01 begin
+
+        if health_stat != 0x00 then
+            health_stat += -1
+
+        if happy_stat != 0x00 then
+            happy_stat += -1
+
+    end
+
+    # Decrease health and happiness if tank is too dirty (more than five poops)
+    scratch_1 := 0b11111000
+    scratch_1 &= stat_poop
+    if scratch_1 == 0b11111000 begin
+
+        if health_stat != 0x00 then
+            health_stat += -1
+
+        if happy_stat != 0x00 then
+            happy_stat += -1
+
+    end
+
+    # Event: Add a poop to the bottom of the tank
+    if stat_poop != 0b11111111 begin
+        scratch_1 := 0b00001111
+        scratch_1 &= event_timer
+        if scratch_1 == 0b0001111 begin
+
+            draw_poop
+
+            stat_poop >>= stat_poop
+            stat_poop += 0b10000000
+
+            draw_poop
+
+        end
+    end
+
+    return
+
+##############################################################
+# Checks if a key has been pressed and handles it accordingly.
+##############################################################
+: check_key
+
+    if game_state == STATE_SWIMMING begin
+
+        # Play minigame if 'B' key is pressed
+        scratch_2 := 0x0B
+        if scratch_2 key begin
+
+            # The fish cannot play if stamina is zero
+            if stamina_stat == 0x00 then
+                return
+
+            draw_fish
+
+            # Move the fish to the right edge of the screen, facing left
+            fish_x := 48
+            fish_y := 16
+            fish_dir := DIRECTION_LEFT
+
+            draw_fish
+
+            draw_minigame_field
+
+            # state_val1 will store user's rock/paper/scissors selection
+            state_val1 := GAME_ROCK
+            draw_rps_selection
+
+            # state_val2 will store time until the fish decides
+            state_val2 := 14
+
+            # Transition to play state
+            game_state := STATE_PLAYING
+
+        end
+
+        # Clean tank if 'C' key is pressed
+        scratch_2 := 0x0C
+        if scratch_2 key begin
+
+            # Clean a single poop
+            draw_poop
+            stat_poop <<= stat_poop
+            draw_poop
+
+            return
+
+        end
+
+        # Sleep if 'D' key is pressed
+        scratch_2 := 0x0D
+        if scratch_2 key begin
+
+            # state_val1 will temporarily store bubbles x
+            state_val1 := fish_x
+            state_val1 += -1
+
+            # Shift bubbles to the right if the fish is facing right
+            if fish_dir == DIRECTION_RIGHT begin
+
+                state_val1 += 6
+
+                # Adjust bubble x based upon fish width
+                if fish_level == LEVEL_MEDIUM then
+                    state_val1 += 4
+                if fish_level == LEVEL_LARGE then
+                    state_val1 += 10
+
+            end
+
+            # state_val2 will temporarily store bubbles y
+            state_val2 := fish_y
+            state_val2 += -6
+
+            # Draw sleep bubbles above the fish
+            i := sprite_sleep_bubbles_1
+            sprite state_val1 state_val2 6
+
+            # Transition to sleeping state and reset stamina
+            game_state := STATE_SLEEPING
+            stamina_stat := MAX_STAMINA
+
+            # Use scratch_2 to keep track of how long to stay sleeping
+            scratch_2 := 0x0A
+
+            return
+
+        end
+
+        # Show stats if 'E' key is pressed
+        scratch_2 := 0x0E
+        if scratch_2 key begin
+
+            # Transition to stats display state
+            game_state := STATE_STATS
+
+            clear
+            draw_stats_text
+
+            return
+
+        end
+
+        # Feed fish if 'F' key is pressed
+        scratch_2 := 0x0F
+        if scratch_2 key begin
+
+            # The fish cannot be fed if stamina is zero
+            if stamina_stat == 0x00 then
+                return
+
+            # Choose random x location in [16, 47] for fish food
+            # state_val1 and state_val2 will temporarily store food x and y
+            state_val1 := random 0b11111
+            state_val1 += 16
+            state_val2 := 0x00
+
+            i := sprite_food
+            sprite state_val1 state_val2 6
+
+            # Transition to feeding state and reset hunger
+            game_state := STATE_FEEDING
+            hunger_stat := 0x00
+
+            return
+
+        end
+
+    end
+
+    if game_state == STATE_STATS begin
+
+        # Wait for any key press to leave the stats screen
+        scratch_1 := key
+
+        # Clear screen and redraw ground, poop, and fish
+        clear
+        draw_ground
+        draw_poop
+        draw_fish
+
+        # Transition to swimming state
+        game_state := STATE_SWIMMING
+
+    end
+
+    if game_state == STATE_PLAYING begin
+
+        # Navigate up among possible rock/paper/scissors options
+        scratch_2 := 0x02
+        if scratch_2 key begin
+
+            draw_rps_selection
+            
+            state_val1 += 1
+            if state_val1 == 0x04 then
+                state_val1 := GAME_ROCK
+
+            draw_rps_selection
+
+        end
+
+        # Navigate down among possible rock/paper/scissors options
+        scratch_2 := 0x08
+        if scratch_2 key begin
+
+            draw_rps_selection
+            
+            state_val1 += -1
+            if state_val1 == 0x00 then
+                state_val1 := GAME_SCISSORS
+
+            draw_rps_selection
+
+        end
+
+    end
+
+    return
+
+##########################################################################
+# Updates the fish's direction, if the fish has hit one of the boundaries.
+##########################################################################
+: update_direction
+
+    # Check for fish at right edge of screen
+    scratch_1 := fish_x
+    scratch_1 += 16
+    scratch_2 := 0b11000000
+    scratch_1 &= scratch_2
+    if scratch_1 != 0x00 then
+        fish_dir := DIRECTION_LEFT
+
+    # Check for fish at left edge of screen
+    scratch_1 := fish_x
+    scratch_2 := 0b11111000
+    scratch_1 &= scratch_2
+    if scratch_1 == 0x00 then
+        fish_dir := DIRECTION_RIGHT
+
+    return
+
+###########################################################################
+# Ends the game, preventing further user interaction. Rest in peace, fishy.
+###########################################################################
+: end_game
+
+    # If the fish has already gone to fishy heaven, there's nothing to do
+    if game_state == STATE_DEAD then
+        return
+
+    game_state := STATE_DEAD
+
+    # Draw an upside-down fish at the top of the tank
+    fish_y := 0x00
+    fish_dir := DIRECTION_RIGHT
+    draw_flipped_fish
+
+    # Draw a RIP message
+    i := sprite_rip_1
+    scratch_1 := 52
+    scratch_2 := 23
+    sprite scratch_1 scratch_2 5
+    i := sprite_rip_2
+    scratch_1 := 60
+    sprite scratch_1 scratch_2 5
+
+    return
+
+#############################################################################
+# Draws the rock/paper/scissors minigame field. The field consists of a box
+# indicating the user's selection; up and down arrows; and the fish's thought
+# bubble.
+#############################################################################
+: draw_minigame_field
+
+    scratch_1 := 8
+    scratch_2 := 10
+
+    # Draw left half of box indicating user's selection
+    i := sprite_box_left
+    sprite scratch_1 scratch_2 11
+
+    # Draw right half of box indicating user's selection
+    scratch_1 := 16
+    i := sprite_box_right
+    sprite scratch_1 scratch_2 11
+
+    # Draw up arrow
+    scratch_1 := 12
+    scratch_2 := 6
+    i := sprite_up_arrow
+    sprite scratch_1 scratch_2 3
+
+    # Draw down arrow
+    scratch_2 := 22
+    i := sprite_down_arrow
+    sprite scratch_1 scratch_2 3
+
+    # Draw left half of the fish's thought bubble
+    scratch_1 := 34
+    scratch_2 := 6
+    i := sprite_bubble_left
+    sprite scratch_1 scratch_2 11
+
+    # Draw right half of the fish's thought bubble
+    scratch_1 := 42
+    i := sprite_bubble_right
+    sprite scratch_1 scratch_2 12
+
+    return
+
+##############################################################################
+# Draws the sprite corresponding to the user's selection at this moment in the
+# rock/paper/scissors minigame.
+##############################################################################
+: draw_rps_selection
+
+    scratch_1 := state_val1
+    load_rps_sprite
+
+    scratch_1 := 10
+    scratch_2 := 12
+    sprite scratch_1 scratch_2 7
+
+    # The scissors image consists of two sprites
+    if state_val1 == GAME_SCISSORS begin
+        scratch_1 := 18
+        i := sprite_scissors_2
+    sprite scratch_1 scratch_2 6
+    end
+
+    return
+
+###############################################################################
+# Loads the i register with the sprite corresponding to the user's selection at
+# this moment in the rock/paper/scissors minigame.
+###############################################################################
+: load_rps_sprite
+    i := sprite_rock
+    if scratch_1 == GAME_SCISSORS then
+        i := sprite_scissors_1
+    if scratch_1 == GAME_PAPER then
+        i := sprite_paper
+    return
+
+#########################
+# Draws the title screen.
+#########################
+: draw_title_screen
+
+    scratch_1 := 0
+    scratch_2 := 4
+    state_val1 := 4
+
+    i := title_screen_data
+
+    loop
+
+        sprite scratch_1 scratch_2 4
+        scratch_1 += 8
+        if scratch_1 == 64 begin
+            scratch_1 := 0
+            scratch_2 += 4
+        end
+
+        i += state_val1
+
+        if scratch_2 != 28 then
+            again
+
+    return
+
+###########################
+# Draws the victory screen.
+###########################
+: draw_win_screen
+
+    scratch_1 := 0
+    scratch_2 := 0
+    state_val1 := 8
+
+    i := win_screen_data
+
+    loop
+
+        sprite scratch_1 scratch_2 8
+        scratch_1 += 8
+        if scratch_1 == 64 begin
+            scratch_1 := 0
+            scratch_2 += 8
+        end
+
+        i += state_val1
+
+        if scratch_2 != 32 then
+            again
+
+    return
+
+####################################
+# Draws the bottom of the fish tank.
+####################################
+: draw_ground
+
+    i := sprite_ground
+    
+    scratch_2 := 31
+    scratch_1 := 0
+
+    loop
+        sprite scratch_1 scratch_2 1
+        scratch_1 += 8
+        if scratch_1 != 64 then
+    again
+    return
+
+############################################################
+# Draws a row of fish droppings at the bottom of the screen.
+############################################################
+: draw_poop
+
+    i := sprite_poop
+
+    # x coordinate of poop sprite
+    state_val1 := 0
+
+    # y coordinate of poop sprite
+    state_val2 := 29
+
+    scratch_1 := stat_poop
+
+    loop
+
+        scratch_1 <<= scratch_1
+        if vF != 0x00 then
+            sprite state_val1 state_val2 2
+
+        state_val1 += 8
+
+        if scratch_1 != 0x00 then
+    again
+
+    return
+
+########################################################
+# Draws the fish sprite on the screen at fish_x, fish_y.
+# The fish's size will depend upon its level.
+########################################################
+: draw_fish
+
+    if fish_level == LEVEL_SMALL then
+        draw_small_fish
+    if fish_level == LEVEL_MEDIUM then
+        draw_medium_fish
+    if fish_level == LEVEL_LARGE then
+        draw_large_fish
+
+    return
+
+###################################################################
+# Draws an upside-down fish sprite on the screen at fish_x, fish_y.
+# The fish's size will depend upon its level.
+###################################################################
+: draw_flipped_fish
+
+    if fish_level == LEVEL_SMALL then
+        draw_small_fish
+    if fish_level == LEVEL_MEDIUM then
+        draw_medium_flipped_fish
+    if fish_level == LEVEL_LARGE then
+        draw_large_flipped_fish
+
+    return
+
+#######################################################
+# Draws text describing the fish's stats on the screen.
+#######################################################
+: draw_stats_text
+
+    scratch_2 := 4
+
+    i := sprite_hunger_text_1
+    sprite scratch_2 scratch_2 5
+
+    scratch_1 := 12
+    i := sprite_hunger_text_2
+    sprite scratch_1 scratch_2 5
+
+    scratch_1 := 20
+    i := sprite_hunger_text_3
+    sprite scratch_1 scratch_2 5
+
+    scratch_2 := 13
+
+    scratch_1 := 4
+    i := sprite_happy_text_1
+    sprite scratch_1 scratch_2 5
+
+    scratch_1 := 12
+    i := sprite_happy_text_2
+    sprite scratch_1 scratch_2 5
+
+    scratch_1 := 20
+    i := sprite_happy_text_3
+    sprite scratch_1 scratch_2 5
+
+    scratch_2 := 22
+
+    scratch_1 := 4
+    i := sprite_stamina_text_1
+    sprite scratch_1 scratch_2 5
+
+    scratch_1 := 12
+    i := sprite_stamina_text_2
+    sprite scratch_1 scratch_2 5
+
+    scratch_1 := 20
+    i := sprite_stamina_text_3
+    sprite scratch_1 scratch_2 5
+
+    scratch_1 := 28
+    i := sprite_stamina_text_4
+    sprite scratch_1 scratch_2 5
+
+    # Store BCD of hunger stat
+    i := bcd_address_1
+    scratch_1 := hunger_stat
+    bcd scratch_1
+
+    i := bcd_address_1
+    load v0
+    i := hex v0
+
+    scratch_1 := 46
+    scratch_2 := 4
+    sprite scratch_1 scratch_2 5
+
+    i := bcd_address_2
+    load v0
+    i := hex v0
+
+    scratch_1 := 51
+    sprite scratch_1 scratch_2 5
+
+    i := bcd_address_3
+    load v0
+    i := hex v0
+
+    scratch_1 := 56
+    sprite scratch_1 scratch_2 5
+
+    # Store BCD of happy stat
+    i := bcd_address_1
+    scratch_1 := happy_stat
+    bcd scratch_1
+
+    i := bcd_address_1
+    load v0
+    i := hex v0
+
+    scratch_1 := 46
+    scratch_2 := 13
+    sprite scratch_1 scratch_2 5
+
+    i := bcd_address_2
+    load v0
+    i := hex v0
+
+    scratch_1 := 51
+    sprite scratch_1 scratch_2 5
+
+    i := bcd_address_3
+    load v0
+    i := hex v0
+
+    scratch_1 := 56
+    sprite scratch_1 scratch_2 5
+
+    # Store BCD of stamina stat
+    i := bcd_address_1
+    scratch_1 := stamina_stat
+    bcd scratch_1
+
+    i := bcd_address_1
+    load v0
+    i := hex v0
+
+    scratch_1 := 46
+    scratch_2 := 22
+    sprite scratch_1 scratch_2 5
+
+    i := bcd_address_2
+    load v0
+    i := hex v0
+
+    scratch_1 := 51
+    sprite scratch_1 scratch_2 5
+
+    i := bcd_address_3
+    load v0
+    i := hex v0
+
+    scratch_1 := 56
+    sprite scratch_1 scratch_2 5
+
+    return
+
+########################################################
+# Draws a small fish sprite on screen at fish_x, fish_y.
+########################################################
+: draw_small_fish
+
+    i := sprite_small_fish_left
+    if fish_dir == DIRECTION_RIGHT then
+        i := sprite_small_fish_right
+
+    sprite fish_x fish_y 3
+    return
+
+#########################################################
+# Draws a medium fish sprite on screen at fish_x, fish_y.
+#########################################################
+: draw_medium_fish
+
+    i := sprite_medium_fish_left
+    if fish_dir == DIRECTION_RIGHT then
+        i := sprite_medium_fish_right
+
+    sprite fish_x fish_y 4
+    return
+
+#####################################################################
+# Draws a medium upside-down fish sprite on screen at fish_x, fish_y.
+#####################################################################
+: draw_medium_flipped_fish
+    i := sprite_medium_flipped_fish
+    sprite fish_x fish_y 4
+    return
+
+########################################################
+# Draws a large fish sprite on screen at fish_x, fish_y.
+########################################################
+: draw_large_fish
+
+    # Draw the left half of the large fish sprite
+    i := sprite_large_fish_1_left
+    if fish_dir == DIRECTION_RIGHT then
+        i := sprite_large_fish_1_right
+    sprite fish_x fish_y 8
+
+    fish_x += 8
+
+    # Draw the right half of the large fish sprite
+    i := sprite_large_fish_2_left
+    if fish_dir == DIRECTION_RIGHT then
+        i := sprite_large_fish_2_right
+    sprite fish_x fish_y 8
+
+    fish_x += -8
+
+    return
+
+####################################################################
+# Draws a large upside-down fish sprite on screen at fish_x, fish_y.
+####################################################################
+: draw_large_flipped_fish
+
+    # Draw the left half of the large fish sprite
+    i := sprite_large_flipped_fish_1
+    sprite fish_x fish_y 6
+
+    fish_x += 8
+
+    # Draw the right half of the large fish sprite
+    i := sprite_large_flipped_fish_2
+    sprite fish_x fish_y 6
+
+    return
+
+: sprite_ground
+    0b11111111
+
+: sprite_poop
+    0b00011000
+    0b00111100
+
+: sprite_food
+    0b10000000
+    0b00010000
+    0b01000000
+    0b00001000
+    0b10000000
+    0b00100000
+
+: sprite_sleep_bubbles_1
+    0b10000000
+    0b00000000
+    0b10000000
+    0b00000000
+    0b10000000
+    0b00000000
+
+: sprite_sleep_bubbles_2
+    0b10000000
+    0b10000000
+    0b10000000
+    0b10000000
+    0b10000000
+    0b10000000
+
+: sprite_small_fish_left
+    0b01101000
+    0b11110000
+    0b01101000
+
+: sprite_small_fish_right
+    0b10110000
+    0b01111000
+    0b10110000
+
+: sprite_medium_fish_left
+    0b01111011
+    0b10111110
+    0b11111110
+    0b01111011   
+
+: sprite_medium_fish_right
+    0b11011110
+    0b01111101
+    0b01111111
+    0b11011110
+
+: sprite_medium_flipped_fish
+    0b11011110
+    0b01111111
+    0b01111111
+    0b11011110
+
+: sprite_large_fish_1_left
+    0b01110000
+    0b10001000
+    0b10011111
+    0b00111111
+    0b00101111
+    0b00111111
+    0b00000011
+    0b00011111
+
+: sprite_large_fish_2_left
+    0b00000000
+    0b00000000
+    0b10000000
+    0b11011000
+    0b11110000
+    0b11100000
+    0b11010000
+    0b10011000
+
+: sprite_large_fish_1_right
+    0b00000000
+    0b00000000
+    0b00001111
+    0b11011111
+    0b01111111
+    0b00111111
+    0b01011110
+    0b11001111
+
+: sprite_large_fish_2_right
+    0b01110000
+    0b10001000
+    0b11001000
+    0b11100000
+    0b10100000
+    0b11100000
+    0b00000000
+    0b11000000
+
+: sprite_large_flipped_fish_1
+    0b11001111
+    0b01011110
+    0b00111111
+    0b01111111
+    0b11011111
+    0b00001111
+
+: sprite_large_flipped_fish_2
+    0b11000000
+    0b00000000
+    0b11100000
+    0b11100000
+    0b11100000
+    0b11000000
+
+: sprite_rip_1
+    0b11001110
+    0b10100100
+    0b11000100
+    0b10100100
+    0b10101110
+
+: sprite_rip_2
+    0b11100000
+    0b10100000
+    0b11100000
+    0b10000000
+    0b10000000
+
+: sprite_hunger_text_1
+    0b10101010
+    0b10101010
+    0b11101010
+    0b10101010
+    0b10101110
+
+: sprite_hunger_text_2
+    0b11001110
+    0b10101000
+    0b10101010
+    0b10101010
+    0b10101110
+
+: sprite_hunger_text_3
+    0b11101100
+    0b10001010
+    0b11001100
+    0b10001010
+    0b11101010
+
+: sprite_happy_text_1
+    0b10101110
+    0b10101010
+    0b11101110
+    0b10101010
+    0b10101010
+
+: sprite_happy_text_2
+    0b11101110
+    0b10101010 
+    0b11101110 
+    0b10001000 
+    0b10001000
+
+: sprite_happy_text_3
+    0b10100000
+    0b10100000
+    0b11100000
+    0b01000000
+    0b01000000
+
+: sprite_stamina_text_1
+    0b11101110
+    0b10000100
+    0b11100100
+    0b00100100
+    0b11100100
+
+: sprite_stamina_text_2
+    0b11101111
+    0b10101010
+    0b11101010
+    0b10101010
+    0b10101010
+
+: sprite_stamina_text_3
+    0b10111011
+    0b10010010
+    0b10010010
+    0b10010010
+    0b10111010
+
+: sprite_stamina_text_4
+    0b00111000
+    0b10101000
+    0b10111000
+    0b10101000
+    0b10101000
+
+: sprite_up_arrow
+    0b00100000
+    0b01110000
+    0b11111000
+
+: sprite_down_arrow
+    0b11111000
+    0b01110000
+    0b00100000
+
+: sprite_rock
+    0b00000000
+    0b00011100
+    0b00111110
+    0b01111111
+    0b01111111
+    0b00111110
+    0b00000000
+
+: sprite_paper
+    0b01111110
+    0b01001011
+    0b01001001
+    0b01001111
+    0b01000001
+    0b01000001
+    0b01111111
+
+: sprite_scissors_1
+    0b01000011
+    0b10100111
+    0b01101100
+    0b00010000
+    0b01101100
+    0b10100111
+    0b01000011
+
+: sprite_scissors_2
+    0b00000000
+    0b10000000
+    0b00000000
+    0b00000000
+    0b00000000
+    0b10000000
+
+: sprite_bubble_left
+    0b01111111
+    0b10000000
+    0b10000000
+    0b10000000
+    0b10000000
+    0b10000000
+    0b10000000
+    0b10000000
+    0b10000000
+    0b10000000
+    0b01111111
+
+: sprite_bubble_right
+    0b11110000
+    0b00001000
+    0b00001000
+    0b00001000
+    0b00001000
+    0b00001000
+    0b00001000
+    0b00001000
+    0b00001000
+    0b00001000
+    0b11110000
+    0b00111000
+
+: sprite_box_left
+    0b11111111
+    0b10000000
+    0b10000000
+    0b10000000
+    0b10000000
+    0b10000000
+    0b10000000
+    0b10000000
+    0b10000000
+    0b10000000
+    0b11111111
+
+: sprite_box_right
+    0b11111000
+    0b00001000
+    0b00001000
+    0b00001000
+    0b00001000
+    0b00001000
+    0b00001000
+    0b00001000
+    0b00001000
+    0b00001000
+    0b11111000
+
+: sprite_thinking_dots_1
+    0b10000000
+
+: sprite_thinking_dots_2
+    0b00010000
+
+: sprite_thinking_dots_3
+    0b00000010
+
+: sprite_thinking_dots_all
+    0b10010010
+
+: title_screen_data
+    0x03 0x04 0x05 0x05 0xFF 0x2A 0xAB 0xE3
+    0xFF 0x21 0x6D 0x6D 0xFF 0x0B 0x6B 0x6B
+    0xFF 0x66 0x5A 0x5A 0xFF 0x31 0xDB 0xDB
+    0xFF 0x68 0x6A 0x6A 0xC0 0x20 0xA0 0xA0
+    0x05 0x05 0x04 0x03 0xEB 0xAB 0x2A 0xFF
+    0x61 0x6F 0x2F 0xFF 0x6B 0x5B 0x28 0xFF
+    0x42 0x5A 0x5A 0xFF 0x3B 0xDB 0xD1 0xFF
+    0x6A 0x6A 0x0A 0xFF 0xA0 0xA0 0xA0 0xC0
+    0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+    0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+    0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+    0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+    0x03 0x02 0x03 0x02 0xB3 0xAA 0xB3 0x2A
+    0xBB 0x22 0x3B 0x08 0x81 0x02 0x83 0x82
+    0x32 0xAA 0xAB 0xA9 0x82 0x82 0x83 0x02
+    0xBA 0xA2 0x33 0xA1 0x80 0x80 0x80 0x00
+    0x02 0x00 0x00 0x00 0x2B 0x00 0x00 0x00
+    0xBB 0x00 0x00 0x3B 0x82 0x00 0x00 0x83
+    0xA9 0x00 0x00 0xA1 0x02 0x00 0x00 0x28
+    0xB9 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+    0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+    0x12 0x12 0x12 0x13 0x82 0x83 0x82 0x82
+    0xA2 0xA3 0x22 0x3A 0xA8 0xB8 0x90 0x90
+    0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+
+: win_screen_data
+    0x00 0x00 0x00 0x57 0x55 0x75 0x25 0x27
+    0x00 0x00 0x00 0x51 0x51 0x51 0x51 0x71
+    0x00 0x00 0x00 0x17 0x52 0x52 0x52 0xF7
+    0x00 0x00 0x00 0x64 0x54 0x54 0x50 0x54
+    0x00 0x00 0x00 0x01 0x07 0x1C 0x30 0x60
+    0x03 0x1E 0x70 0xC0 0x00 0x00 0x00 0x78
+    0xF0 0x00 0x00 0x01 0x00 0x00 0x00 0x00
+    0x00 0x00 0x00 0x00 0x80 0x40 0x40 0x20
+    0x00 0x00 0x00 0x00 0x75 0x25 0x27 0x25
+    0x00 0x00 0x00 0x00 0x26 0x55 0x75 0x55
+    0x00 0x00 0x00 0x00 0x57 0x54 0x67 0x51
+    0x00 0x01 0x03 0x02 0x04 0x04 0x04 0x03
+    0xC0 0x80 0x00 0x80 0x00 0x00 0x00 0x00
+    0xCC 0x84 0x84 0xCC 0x78 0x00 0x00 0x00
+    0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x01
+    0x20 0x20 0x40 0x40 0x40 0x80 0x80 0x00
+    0x25 0x00 0x07 0x04 0x07 0x04 0x04 0x00
+    0x55 0x00 0x76 0x55 0x56 0x55 0x75 0x00
+    0x57 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+    0x00 0x06 0x05 0x04 0x04 0x06 0x02 0x03
+    0x80 0x78 0x04 0xF8 0x00 0x00 0x00 0x00
+    0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+    0x02 0x04 0x00 0x00 0x07 0x18 0x20 0x0F
+    0x00 0x00 0x00 0xFE 0x01 0x3F 0xC1 0x0F
+    0x74 0x54 0x74 0x44 0x47 0x00 0x00 0x00
+    0x25 0x55 0x77 0x52 0x52 0x00 0x00 0x00
+    0x76 0x25 0x25 0x25 0x75 0x00 0x00 0x00
+    0x51 0x50 0x10 0x00 0x10 0x00 0x00 0x00
+    0x80 0xC0 0x60 0x30 0x1C 0x07 0x01 0x00
+    0x00 0x00 0x00 0x00 0x00 0x00 0xC0 0x7C
+    0x00 0x0F 0x00 0x07 0x00 0x00 0x07 0x00
+    0x32 0xC2 0x1C 0xEC 0x10 0xE0 0x00 0x00
+
+: bcd_address_1
+    0x00
+: bcd_address_2
+    0x00
+: bcd_address_3
+    0x00

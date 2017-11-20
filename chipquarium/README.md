@@ -61,4 +61,4 @@ included [LICENSE][4] file.
 [1]: http://github.com/JohnEarnest/Octo "JohnEarnest / Octo"
 [2]: http://www.awfuljams.com/octojam-iii/ "Octo-ber Jam III"
 [3]: http://en.wikipedia.org/wiki/COSMAC_VIP "COSMAC VIP"
-[4]: LICENSE "MIT License"
+[4]: ../LICENSE "MIT License"

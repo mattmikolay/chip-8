@@ -1,16 +1,39 @@
-# chip-8
+# CHIP-8
 A collection of CHIP-8 programs and documentation.
 
-Please see the [wiki][1] for documentation related to CHIP-8.
+## Documentation
+
+- [CHIP-8 Technical Reference][technical]
+- [CHIP-8 Extensions Reference][extensions]
+- [CHIP-8 Instruction Set][instructions]
+
+## Programs 
+
+### Games
+
+- [Cavern](cavern)
+- [Chipquarium](chipquarium)
+
+### Demos
+
+- [Heart Monitor](heartmonitor)
+- [Morse Code](morsecode)
+
+### Utilities
+
+- [Delay Timer Test](delaytimer)
+- [Random Number Test](randomnumber)
 
 ## License
 Source code in this repository is licensed under the MIT License. For more
-information, see the included [LICENSE][2] file.
+information, see the included [LICENSE][mit-license] file.
 
 Documentation in the wiki is licensed under [Creative Commons Attribution Share
-Alike 4.0][3].
+Alike 4.0][cc-license].
 
-[1]: https://github.com/mattmikolay/chip-8/wiki "CHIP-8 wiki"
-[2]: LICENSE "MIT License"
-[3]: http://creativecommons.org/licenses/by-sa/4.0/
+[mit-license]: LICENSE "MIT License"
+[cc-license]: http://creativecommons.org/licenses/by-sa/4.0/
         "Creative Commons Attribution Share Alike 4.0"
+[technical]: https://github.com/mattmikolay/chip-8/wiki/CHIP%E2%80%908-Technical-Reference
+[extensions]: https://github.com/mattmikolay/chip-8/wiki/CHIP%E2%80%908-Extensions-Reference
+[instructions]: https://github.com/mattmikolay/chip-8/wiki/CHIP%E2%80%908-Instruction-Set

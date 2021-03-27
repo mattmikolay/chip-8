@@ -28,12 +28,11 @@ A collection of CHIP-8 programs and documentation.
 Source code in this repository is licensed under the MIT License. For more
 information, see the included [LICENSE][mit-license] file.
 
-Documentation in the wiki is licensed under [Creative Commons Attribution Share
-Alike 4.0][cc-license].
+Documentation in the wiki is licensed under a [Creative Commons] license. Please
+see individual wiki pages for details.
 
 [mit-license]: LICENSE "MIT License"
-[cc-license]: http://creativecommons.org/licenses/by-sa/4.0/
-        "Creative Commons Attribution Share Alike 4.0"
+[Creative Commons]: https://creativecommons.org/
 [technical]: https://github.com/mattmikolay/chip-8/wiki/CHIP%E2%80%908-Technical-Reference
 [extensions]: https://github.com/mattmikolay/chip-8/wiki/CHIP%E2%80%908-Extensions-Reference
 [instructions]: https://github.com/mattmikolay/chip-8/wiki/CHIP%E2%80%908-Instruction-Set

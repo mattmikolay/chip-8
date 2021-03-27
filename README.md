@@ -6,6 +6,7 @@ A collection of CHIP-8 programs and documentation.
 - [CHIP-8 Technical Reference][technical]
 - [CHIP-8 Extensions Reference][extensions]
 - [CHIP-8 Instruction Set][instructions]
+- [Mastering CHIP-8][mastering]
 
 ## Programs 
 
@@ -36,3 +37,4 @@ see individual wiki pages for details.
 [technical]: https://github.com/mattmikolay/chip-8/wiki/CHIP%E2%80%908-Technical-Reference
 [extensions]: https://github.com/mattmikolay/chip-8/wiki/CHIP%E2%80%908-Extensions-Reference
 [instructions]: https://github.com/mattmikolay/chip-8/wiki/CHIP%E2%80%908-Instruction-Set
+[mastering]: https://github.com/mattmikolay/chip-8/wiki/Mastering-CHIP%E2%80%908
